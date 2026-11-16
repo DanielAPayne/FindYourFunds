@@ -18,3 +18,6 @@ jobs:
           node-version: 22
       - name: Check every source URL
         run: npm run check-links
+      - name: Check city and county data sources
+        if: always()
+        run: npm run check-local

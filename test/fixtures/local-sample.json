@@ -1,0 +1,119 @@
+{
+ "4hhd-fzq6": [
+  {
+   "fund_cash_code": "10",
+   "check_date": "2016-01-08T00:00:00.000",
+   "payee_name": "GOLDIN & ASSOC, INC.",
+   "payee_address1": "10 WEYBOSSET STREET, SUITE 800",
+   "city": "PROVIDENCE",
+   "state": "RI",
+   "zip_code": "02903",
+   "payment_amount": "247.20"
+  },
+  {
+   "fund_cash_code": "10",
+   "check_date": "2023-01-24T00:00:00.000",
+   "payee_name": "AXIOM OCCUPATIONAL HEALTH LLC",
+   "payee_address1": "100 SMITHFIELD AVENUE",
+   "city": "PAWTUCKET",
+   "state": "RI",
+   "zip_code": "02860",
+   "payment_amount": "900.00"
+  },
+  {
+   "fund_cash_code": "10",
+   "check_date": "2023-01-31T00:00:00.000",
+   "payee_name": "ALPHA PHYSICAL THERAPY INC.",
+   "payee_address1": "495 ATWOOD AVENUE",
+   "city": "CRANSTON",
+   "state": "RI",
+   "zip_code": "02920",
+   "payment_amount": "236.92"
+  }
+ ],
+ "ea8s-irrm": [
+  {
+   "payee_id": "0000233781",
+   "payee_name": "1156 Lincoln Ave Llc",
+   "oldest_check_date": "2026-04-08T00:00:00.000",
+   "check_amount": "5000.00"
+  },
+  {
+   "payee_id": "0000234488",
+   "payee_name": "1400 Energy Park Drive Llc",
+   "oldest_check_date": "2026-01-21T00:00:00.000",
+   "check_amount": "17291.73"
+  },
+  {
+   "payee_id": "0000235628",
+   "payee_name": "1770 Grand Ave Llc",
+   "oldest_check_date": "2026-08-07T00:00:00.000",
+   "check_amount": "21753.72"
+  }
+ ],
+ "er4x-svwp": [
+  {
+   "check_date": "2026-03-10T00:00:00.000",
+   "vendor_name": "SDH LLC",
+   "amount": "29.38"
+  },
+  {
+   "check_date": "2026-03-10T00:00:00.000",
+   "vendor_name": "SDH LLC",
+   "amount": "610.88"
+  },
+  {
+   "check_date": "2026-03-12T00:00:00.000",
+   "vendor_name": "REDWOOD SECURITY SYSTEMS INC",
+   "amount": "171.00"
+  }
+ ],
+ "7zt2-w5w6": [
+  {
+   "checknumber": "2142290",
+   "issuedate": "2025-12-17T00:00:00.000",
+   "issueamount": "453.62",
+   "payeename": "JOPLIN PROPERTY GROUP LLC"
+  },
+  {
+   "checknumber": "2142265",
+   "issuedate": "2025-12-17T00:00:00.000",
+   "issueamount": "2948.47",
+   "payeename": "PRIVATE ASSETS HOLDER LLC"
+  },
+  {
+   "checknumber": "2139730",
+   "issuedate": "2025-12-03T00:00:00.000",
+   "issueamount": "120",
+   "payeename": "THE RANCH AT LAKE SONOMA LLC"
+  }
+ ],
+ "vtyn-52t8": [
+  {
+   "name": "1 FINAL FINAL LLC",
+   "date": "2024-01-12T00:00:00.000",
+   "amount": "3508.94"
+  },
+  {
+   "name": "7401 GALILEE RD LLC",
+   "date": "2023-10-20T00:00:00.000",
+   "amount": "113.82"
+  },
+  {
+   "name": "8000 FOOTHILLS LLC",
+   "date": "2023-07-21T00:00:00.000",
+   "amount": "1282.33"
+  }
+ ],
+ "h3i4-5e5v": [
+  {
+   "last": "1200 WINDSOR LLC"
+  },
+  {
+   "last": "12113 METRIC BLVD LLC"
+  },
+  {
+   "last": "12113 METRIC BLVD LLC"
+  }
+ ]
+}
