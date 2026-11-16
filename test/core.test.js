@@ -20,6 +20,17 @@ test("every v2 positional key maps to a current source", () => {
   for (const id of R.RETIRED_IDS) assert.ok(!ids.includes(id), `${id} is retired but still listed`);
 });
 
+test("index.html loads every script with the current package version", () => {
+  // GitHub Pages caches files for 10 minutes; a versioned URL keeps a new page from running old scripts.
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const version = require("../package.json").version;
+  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  const tags = [...html.matchAll(/<script src="([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(tags.length >= 4);
+  for (const src of tags) assert.equal(src.split("?v=")[1], version, `${src} should end with ?v=${version}`);
+});
+
 test("discontinued sources are gone", () => {
   assert.ok(!R.SOURCES.some((s) => /treasury hunt/i.test(s.name)));
   assert.ok(!R.SOURCES.some((s) => s.url.includes("benefits.gov")));

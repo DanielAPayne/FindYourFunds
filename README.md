@@ -66,3 +66,7 @@ CI runs the tests and checks the CSV on every push and pull request. A weekly wo
 re-checks every source link.
 
 This is an information tool, not legal or financial advice.
+
+When releasing, bump `version` in `package.json` and the matching `?v=` on each script tag in
+`index.html` (a test checks they agree), so returning visitors never run cached old scripts
+against a new page.
