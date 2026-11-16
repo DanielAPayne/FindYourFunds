@@ -152,6 +152,7 @@
     #wageStatus.error { color: var(--warn); }
     .wage-results { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 10px; }
     .wage-results li { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--bg); min-width: 0; }
+    .wage-results li.lead { border-left: 4px solid var(--gold); }
     .wage-results h3 { font-family: var(--font-display); font-size: 15px; margin: 0 0 2px; overflow-wrap: anywhere; }
     .wage-results p { margin: 2px 0; font-size: 13.5px; color: var(--ink-soft); }
     .wage-results .amount { color: var(--ink); font-weight: 600; }
@@ -215,6 +216,19 @@
     <p id="wageStatus" role="status"></p>
     <ol id="wageResults" class="wage-results"></ol>
     <p class="meta" id="wageSource"></p>
+  </section>
+
+  <section class="panel" id="bankPanel" aria-labelledby="bankTitle">
+    <h2 id="bankTitle">Check banks you've used for failures</h2>
+    <p class="hint">Searches the FDIC's list of every bank that failed or needed FDIC help since 1934, and explains what happened to depositors' money. The list is searched on this device; the bank name you type isn't sent anywhere.</p>
+    <form id="bankForm" class="wage-form">
+      <div class="field grow"><label for="bankName">Bank name</label><input id="bankName" autocomplete="off" minlength="2" required placeholder="e.g. Washington Mutual"></div>
+      <div class="field"><label for="bankState">State (optional)</label><select id="bankState"></select></div>
+      <button class="btn primary" type="submit" id="bankGo">Search</button>
+    </form>
+    <p id="bankStatus" role="status"></p>
+    <ol id="bankResults" class="wage-results"></ol>
+    <p class="meta" id="bankSource"></p>
   </section>
 
   <div class="rail" aria-label="Your ledger">
@@ -283,8 +297,9 @@
     <h2 id="faqTitle">Questions people ask</h2>
     <details><summary>Does this cost anything?</summary><p>This tool is free and has no ads. Official state unclaimed-property searches and claims are generally free. Other processes can cost money: some court funds require a filing, estates may need legal help, and some recovered money is taxable. Each source's badge shows whether searching it is free.</p></details>
     <details><summary>What happens to my information?</summary><p>There's no account and no server. Your tags and tracking are stored in this browser's local storage and are not sent anywhere by this tool. Sites you open from here have their own privacy policies. Browser data can be cleared, so use Back up to keep a copy.</p></details>
-    <details><summary>Does this search for me?</summary><p>Partly. The back-wage check searches Department of Labor data directly in your browser. For everything else, you open each official site and search it yourself, then record the result here. Most agencies don't publish their records in a form a website is allowed to search automatically.</p></details>
+    <details><summary>Does this search for me?</summary><p>Partly. The back-wage and failed-bank checks search Department of Labor and FDIC data directly in your browser. For everything else, you open each official site and search it yourself, then record the result here. Most agencies don't publish their records in a form a website is allowed to search automatically.</p></details>
     <details><summary>The back-wage check found my employer. Am I owed money?</summary><p>Not necessarily. A result means the Department of Labor found that employer owed back wages to some workers during those dates. If you worked there then, search Workers Owed Wages to see whether money is being held for you, or contact the Wage and Hour Division.</p></details>
+    <details><summary>My bank is on the failed-bank list. Is money waiting for me?</summary><p>Usually not. In most failures another bank took over the accounts and they simply continued there. The check says how each failure was handled and flags the ones where unclaimed money is possible, such as when the FDIC paid depositors directly. For those, search the FDIC's unclaimed funds list and your state's unclaimed property.</p></details>
     <details><summary>Will I find money?</summary><p>There's no guarantee. MissingMoney.com reports that about 1 in 7 people have unclaimed property, often a modest amount. With a common name, most results belong to other people.</p></details>
     <details><summary>A result has my name. Is it mine?</summary><p>Not necessarily. Check the address and other details against places you've actually lived. You can claim only property that is yours, or that you're entitled to as the heir of a relative who has died. The state verifies identity and address history before paying.</p></details>
     <details><summary>A site asks me to verify I'm human, or the search fails.</summary><p>Official sites use anti-bot checks; complete them when they appear. If a search can't be finished, mark it "Search couldn't be completed" rather than "no match", because a failed search doesn't show that nothing is there.</p></details>
@@ -295,9 +310,9 @@
     <p>This is an information tool, not legal or financial advice.</p>
   </footer>
 </div>
-<script src="src/registry.js?v=0.4.1"></script>
-<script src="src/core.js?v=0.4.1"></script>
-<script src="src/leads.js?v=0.4.1"></script>
-<script src="src/app.js?v=0.4.1"></script>
+<script src="src/registry.js?v=0.5.0"></script>
+<script src="src/core.js?v=0.5.0"></script>
+<script src="src/leads.js?v=0.5.0"></script>
+<script src="src/app.js?v=0.5.0"></script>
 </body>
 </html>

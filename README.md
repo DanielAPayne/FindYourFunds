@@ -21,6 +21,8 @@ browser.
   payments received separate. A reference number found on two sources is counted once.
 - **Backup, restore, and clear**, with optional passphrase encryption (AES-GCM).
 
+- **A failed-bank check**: enter a bank you used, and the page searches the FDIC's list of
+  failed and assisted banks since 1934 and explains what happened to depositors' money.
 - **A back-wage check**: enter a past employer and state, and the page searches U.S.
   Department of Labor enforcement records on your device for cases where that employer was
   found to owe back wages. It turns on once the DOL data is first downloaded.

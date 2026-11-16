@@ -66,18 +66,17 @@ way to fund and govern one.
 | State unclaimed property | No state found that publishes its owner list as open data (Texas requires an emailed request). Official sites block automated searches. | `ASSISTED` |
 | City and county unclaimed funds | Some local registers are open data (for example Austin, TX on Socrata). | Candidate for `BULK_DATA` |
 | The MLC | Public Search API is in beta and requires an access application; governed by the Musical Works Database Terms of Use. | Pending your application |
-| FDIC failed banks | Public, keyless API. Useful for "did a bank I used fail?" | Candidate |
+| FDIC failed banks | Public, keyless API (api.fdic.gov), 4,117 failures and assistance transactions since 1934, with how each was resolved. | `BULK_DATA`, built |
 
 ## Phase 2: Discovery foundation (in progress)
 
 | Item | Status |
 |---|---|
-| Back-wage lead finder (DOL WHD) | Built. Employer search in the browser; results link to Workers Owed Wages and can be saved to notes. Turns on once the data is first downloaded. |
-| Data pipeline | `scripts/build-whd.mjs` plus the monthly `Refresh back-wage data` workflow. Fails rather than publishing if DOL's fields change. |
-| Guard against test data | A test fails if published data looks like the sample fixture. |
-| **Needs you:** DOL API key | Register at dataportal.dol.gov, then add the key as a repository secret named `DOL_API_KEY` and run the workflow once. |
+| Back-wage lead finder (DOL WHD) | Live since Nov 16, 2026: 208,500 cases with back wages from 370,964 DOL records. Monthly refresh; DOL rate-limits, so a full download takes about 30 minutes. |
+| Failed-bank check (FDIC) | Built. Explains each resolution type in plain language and flags the ones where unclaimed money is plausible (payouts, insured-deposit transfers, insured-only assumptions). Monthly refresh, no key. |
+| Data pipelines | `scripts/build-whd.mjs` and `scripts/build-fdic.mjs` with monthly workflows. Both refuse to publish if fields change or data comes back short, and leave files untouched when nothing changed. |
+| Guards against test data | Tests fail if published data looks like a sample fixture. |
 | Local funds (Socrata) | Not started |
-| FDIC failed-bank check | Not started |
 | The MLC | Blocked on an access application |
 
 ## Phase 3: Recovery workflows (not started)
