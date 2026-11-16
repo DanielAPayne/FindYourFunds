@@ -1,41 +1,58 @@
 # Find Your Funds
 
-A free, private web app that helps anyone track down money they're legitimately
-owed — unclaimed property, tax refunds and credits, old pensions, back wages,
-savings bonds, benefits they qualify for, and more. Every source it links to is an
-official U.S. government or institutional database, and every one is free to use.
+A free worklist for finding money that may be owed to you: unclaimed property, uncashed
+refunds, lost retirement accounts, unpaid wages, music royalties, and programs you may
+qualify for. Every source is labeled by who runs it, and nothing you track leaves your
+browser.
 
 **Live site:** https://danielapayne.github.io/FindYourFunds/
 
-## How it works
+## What it does today
 
-1. **Say who you are** — tap the tags that describe you (student, veteran, homeowner,
-   renter, parent, 65+, low income, and so on). The app flags the sources most likely
-   to hold money for you.
-2. **Search the sources** — open each official site and search your name, former
-   names, and relatives whose heir you are.
-3. **Track and claim** — mark what you've searched, log amounts found, and keep notes.
-   A running total shows at the top. You claim directly on the official site — always
-   free.
+- **67 sources in 26 categories**, grouped as *money that may already be yours*, *programs
+  you may qualify for*, and *optional ways to earn*. Each card shows who runs the site
+  (government, official partner, nonprofit, commercial), whether searching is free, how
+  you search it, and when the link was last checked.
+- **Tags** for your situation flag sources worth a look. They never decide eligibility.
+- **A tracker per source**: one status (not searched, no match, couldn't complete,
+  possible match, claim filed, approved, received, not mine), an amount, a reference
+  number, and notes.
+- **A four-part ledger** that keeps possible matches, filed claims, approved amounts, and
+  payments received separate. A reference number found on two sources is counted once.
+- **Backup, restore, and clear**, with optional passphrase encryption (AES-GCM).
+
+It does not search sources automatically yet. See [docs/ROADMAP.md](docs/ROADMAP.md) and
+the full specification in [docs/SPEC.md](docs/SPEC.md).
 
 ## Privacy
 
-This app has no backend and no accounts. Your profile and tracking are stored only in
-your own browser (localStorage) and never leave your device. It never asks for your
-Social Security number, bank details, or payment.
+No account and no server. Tags and tracking are stored in the browser's local storage and
+are not sent anywhere by this site. The page loads no third-party scripts or fonts. Sites
+you open from it have their own privacy policies.
 
-## Honest scope
+## Development
 
-Legitimate "free money" is only ever one of three things: money already yours that got
-separated from you, benefits or credits you qualify for but aren't collecting, or
-grants for a specific purpose. No database hands money to someone who isn't owed it.
-You never pay to claim your own money — ignore any "finder" or "recovery" company that
-wants a cut.
+Plain HTML and JavaScript, no build step.
 
-## Tech
+```
+src/registry.js   every source, with stable ids, labels, and link-check dates
+src/core.js       pure logic: amounts, ledger, migration, backups (tested)
+src/app.js        page behavior
+index.html        markup and styles
+test/             unit tests (node --test)
+scripts/          link checker and tracker CSV generator
+```
 
-A single static `index.html` — no build step, no dependencies beyond Google Fonts.
-Open it locally or host it anywhere static files are served. `found-money-tracker.csv`
-is a printable/offline version of the source list.
+```bash
+npm test               # unit tests
+npm run check-links    # confirm every source URL still loads
+npm run build:csv      # regenerate find-your-funds-tracker.csv from the registry
+```
 
-Sources current as of 2026.
+To add a source, add an entry to `src/registry.js` with a new unique `id`, run the tests,
+and regenerate the CSV. Never reuse or change an existing `id`; tracking data is keyed by it.
+
+CI runs the tests and checks the CSV on every push and pull request. A weekly workflow
+re-checks every source link.
+
+This is an information tool, not legal or financial advice.

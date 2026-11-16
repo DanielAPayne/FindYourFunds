@@ -1,0 +1,14 @@
+{
+  "name": "find-your-funds",
+  "version": "0.3.0",
+  "private": true,
+  "description": "A free worklist for finding money that may be owed to you.",
+  "license": "UNLICENSED",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test test/core.test.js",
+    "check-links": "node scripts/check-links.mjs",
+    "build:csv": "node scripts/build-csv.mjs",
+    "check:csv": "node scripts/build-csv.mjs --check"
+  }
+}
