@@ -19,14 +19,33 @@ const rows = [];
 for (const s of F.LOCAL_SOURCES) {
   const r = { id: s.id, place: `${s.place}, ${s.state}`, result: "ok", note: "" };
   try {
-    const meta = await getJson(`https://${s.domain}/api/views/${s.dataset}.json`);
-    const have = new Set((meta.columns || []).map((c) => c.fieldName));
-    const need = [s.name, s.first, s.last, s.amount, s.date, s.city, s.st].filter(Boolean);
+    const need = F.selectFields(s);
+    let have, updated = null;
+    if (s.platform === "socrata") {
+      const meta = await getJson(`https://${s.domain}/api/views/${s.dataset}.json`);
+      have = new Set((meta.columns || []).map((c) => c.fieldName));
+      if (meta.rowsUpdatedAt) updated = new Date(meta.rowsUpdatedAt * 1000);
+    } else if (s.platform === "arcgis") {
+      const meta = await getJson(`${s.layer}?f=json`);
+      if (meta.error) throw new Error(meta.error.message || "layer error");
+      have = new Set((meta.fields || []).map((f) => f.name));
+      const edit = meta.editingInfo && (meta.editingInfo.dataLastEditDate || meta.editingInfo.lastEditDate);
+      if (edit) updated = new Date(edit);
+    } else {
+      const res = await fetch(s.csvUrl, { headers: { "user-agent": UA }, signal: AbortSignal.timeout(30000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const rowsCsv = F.parseCsv(await res.text());
+      if (!rowsCsv.length) throw new Error("CSV is empty");
+      have = new Set(Object.keys(rowsCsv[0]));
+      const item = await getJson(`https://www.arcgis.com/sharing/rest/content/items/${s.itemId}?f=json`);
+      if (item.modified) updated = new Date(item.modified);
+    }
     const missing = need.filter((f) => !have.has(f));
     if (missing.length) throw new Error(`missing fields: ${missing.join(", ")}`);
-    const sample = await getJson(F.buildLocalUrl(s, { last: "LLC" }));
-    if (!Array.isArray(sample)) throw new Error("sample query didn't return a list");
-    const updated = meta.rowsUpdatedAt ? new Date(meta.rowsUpdatedAt * 1000) : null;
+    if (s.platform !== "csv") {
+      const body = await getJson(F.buildLocalUrl(s, { last: "LLC" }));
+      F.parseLocalResponse(s, body); // throws on an error response
+    }
     const age = updated ? Math.round((Date.now() - updated) / 86400000) : null;
     r.note = updated ? `rows updated ${updated.toISOString().slice(0, 10)} (${age} days ago)` : "update date not published";
     if (age !== null && age > STALE_DAYS) r.result = "stale";
@@ -35,7 +54,7 @@ for (const s of F.LOCAL_SOURCES) {
     r.note = e.message;
   }
   rows.push(r);
-  console.log(`${r.result.padEnd(7)} ${r.id.padEnd(14)} ${r.note}`);
+  console.log(`${r.result.padEnd(7)} ${r.id.padEnd(20)} ${r.note}`);
 }
 
 const broken = rows.filter((r) => r.result === "broken");
