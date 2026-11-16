@@ -115,5 +115,308 @@
   {
    "last": "12113 METRIC BLVD LLC"
   }
- ]
+ ],
+ "sac-warrants": {
+  "objectIdFieldName": "FID",
+  "uniqueIdField": {
+   "name": "FID",
+   "isSystemMaintained": true
+  },
+  "globalIdFieldName": "",
+  "fields": [
+   {
+    "name": "Warrant__",
+    "type": "esriFieldTypeString",
+    "alias": "Warrant #",
+    "sqlType": "sqlTypeNVarchar",
+    "length": 4000,
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "Name_of_the_payee",
+    "type": "esriFieldTypeString",
+    "alias": "Name of the payee",
+    "sqlType": "sqlTypeNVarchar",
+    "length": 4000,
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "Additional_Payee_Name",
+    "type": "esriFieldTypeString",
+    "alias": "Additional Payee Name",
+    "sqlType": "sqlTypeNVarchar",
+    "length": 4000,
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "Amount",
+    "type": "esriFieldTypeDouble",
+    "alias": "Amount",
+    "sqlType": "sqlTypeFloat",
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "FID",
+    "type": "esriFieldTypeOID",
+    "alias": "FID",
+    "sqlType": "sqlTypeInteger",
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "Pmnt_date",
+    "type": "esriFieldTypeDate",
+    "alias": "Pmnt date",
+    "sqlType": "sqlTypeOther",
+    "length": 8,
+    "domain": null,
+    "defaultValue": null
+   }
+  ],
+  "exceededTransferLimit": true,
+  "features": [
+   {
+    "attributes": {
+     "Warrant__": "1103952132",
+     "Name_of_the_payee": "1036 JOHNSON ST LLC",
+     "Additional_Payee_Name": null,
+     "Amount": 166.63,
+     "FID": 2,
+     "Pmnt_date": 1741262400000
+    }
+   },
+   {
+    "attributes": {
+     "Warrant__": "1103973627",
+     "Name_of_the_payee": "1122 T STREET LLC",
+     "Additional_Payee_Name": null,
+     "Amount": 362.78,
+     "FID": 3,
+     "Pmnt_date": 1746532800000
+    }
+   },
+   {
+    "attributes": {
+     "Warrant__": "1103947713",
+     "Name_of_the_payee": "1315 NATIONAL SP, LLC",
+     "Additional_Payee_Name": "WILLIAM WARREN PROPERTIES INC. AAF",
+     "Amount": 5736.95,
+     "FID": 4,
+     "Pmnt_date": 1740052800000
+    }
+   }
+  ]
+ },
+ "sac-ucf": {
+  "objectIdFieldName": "FID",
+  "uniqueIdField": {
+   "name": "FID",
+   "isSystemMaintained": true
+  },
+  "globalIdFieldName": "GlobalID",
+  "fields": [
+   {
+    "name": "Department_Name",
+    "type": "esriFieldTypeString",
+    "alias": "Department Name",
+    "sqlType": "sqlTypeNVarchar",
+    "length": 4000,
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "Email_for_Inquiries",
+    "type": "esriFieldTypeString",
+    "alias": "Email for Inquiries",
+    "sqlType": "sqlTypeNVarchar",
+    "length": 4000,
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "Reference_Number",
+    "type": "esriFieldTypeString",
+    "alias": "Reference Number",
+    "sqlType": "sqlTypeNVarchar",
+    "length": 4000,
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "Name",
+    "type": "esriFieldTypeString",
+    "alias": "Name",
+    "sqlType": "sqlTypeNVarchar",
+    "length": 4000,
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "Amount",
+    "type": "esriFieldTypeDouble",
+    "alias": "Amount",
+    "sqlType": "sqlTypeFloat",
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "FID",
+    "type": "esriFieldTypeOID",
+    "alias": "FID",
+    "sqlType": "sqlTypeInteger",
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "GlobalID",
+    "type": "esriFieldTypeGlobalID",
+    "alias": "GlobalID",
+    "sqlType": "sqlTypeOther",
+    "length": 38,
+    "domain": null,
+    "defaultValue": "NEWID() WITH VALUES"
+   }
+  ],
+  "exceededTransferLimit": true,
+  "features": [
+   {
+    "attributes": {
+     "Department_Name": "FINANCE-FS",
+     "Email_for_Inquiries": "DOF-SystemControl@saccounty.gov ",
+     "Reference_Number": "111866293",
+     "Name": "Clear Wireless LLC",
+     "Amount": 397.49,
+     "FID": 52,
+     "GlobalID": "80217c78-3061-4078-b7ae-1c0d214b0c2c"
+    }
+   },
+   {
+    "attributes": {
+     "Department_Name": "FINANCE-FS",
+     "Email_for_Inquiries": "DOF-SystemControl@saccounty.gov ",
+     "Reference_Number": "111347139",
+     "Name": "Precision Land Surveying Inc",
+     "Amount": 152.5,
+     "FID": 54,
+     "GlobalID": "57c51ebd-95ca-47d2-98b3-99b857478bdf"
+    }
+   },
+   {
+    "attributes": {
+     "Department_Name": "CUBS",
+     "Email_for_Inquiries": "cubscommportal@saccounty.gov",
+     "Reference_Number": "111558311",
+     "Name": "GREENBRIAR PROJECT OWNER LLC",
+     "Amount": 76.64,
+     "FID": 56,
+     "GlobalID": "897b4644-2d51-49ec-9c1e-4f4cdb0fba50"
+    }
+   }
+  ]
+ },
+ "raleigh": {
+  "objectIdFieldName": "FID",
+  "uniqueIdField": {
+   "name": "FID",
+   "isSystemMaintained": true
+  },
+  "globalIdFieldName": "",
+  "fields": [
+   {
+    "name": "Name1",
+    "type": "esriFieldTypeString",
+    "alias": "Name",
+    "sqlType": "sqlTypeNVarchar",
+    "length": 256,
+    "domain": null,
+    "defaultValue": null,
+    "description": "{\"value\":\"\",\"fieldValueType\":\"nameOrTitle\"}"
+   },
+   {
+    "name": "Pymnt_Amt",
+    "type": "esriFieldTypeDouble",
+    "alias": "Payment Amount",
+    "sqlType": "sqlTypeFloat",
+    "domain": null,
+    "defaultValue": null,
+    "description": "{\"value\":\"\",\"fieldValueType\":\"currency\"}"
+   },
+   {
+    "name": "FID",
+    "type": "esriFieldTypeOID",
+    "alias": "FID",
+    "sqlType": "sqlTypeInteger",
+    "domain": null,
+    "defaultValue": null
+   },
+   {
+    "name": "Pymnt_dt",
+    "type": "esriFieldTypeDate",
+    "alias": "Payment Date",
+    "sqlType": "sqlTypeOther",
+    "length": 8,
+    "domain": null,
+    "defaultValue": null,
+    "description": "{\"value\":\"\",\"fieldValueType\":\"dateAndTime\"}"
+   },
+   {
+    "name": "Address",
+    "type": "esriFieldTypeString",
+    "alias": "Address",
+    "sqlType": "sqlTypeOther",
+    "length": 256,
+    "domain": null,
+    "defaultValue": null,
+    "description": "{\"value\":\"\",\"fieldValueType\":\"locationOrPlaceName\"}"
+   },
+   {
+    "name": "PYMNT_ID_Ref",
+    "type": "esriFieldTypeString",
+    "alias": "Payment ID Reference",
+    "sqlType": "sqlTypeInteger",
+    "length": 10,
+    "domain": null,
+    "defaultValue": null,
+    "description": "{\"value\":\"\",\"fieldValueType\":\"uniqueIdentifier\"}"
+   }
+  ],
+  "exceededTransferLimit": true,
+  "features": [
+   {
+    "attributes": {
+     "Name1": "EDWARDS MILL PARTNERS LLC",
+     "Pymnt_Amt": 15.01,
+     "FID": 12,
+     "Pymnt_dt": 1751932800000,
+     "Address": "4428 MILL VILLAGE RD, RALEIGH, NC, 27612-3763",
+     "PYMNT_ID_Ref": "0000282827"
+    }
+   },
+   {
+    "attributes": {
+     "Name1": "NXRT SIX FORKS LLC",
+     "Pymnt_Amt": 23.26,
+     "FID": 14,
+     "Pymnt_dt": 1751932800000,
+     "Address": "8501 NEW BRUNSWICK LN, RALEIGH, NC, 27615-2824",
+     "PYMNT_ID_Ref": "0000282820"
+    }
+   },
+   {
+    "attributes": {
+     "Name1": "NHE St Albans, LLC",
+     "Pymnt_Amt": 2000,
+     "FID": 19,
+     "Pymnt_dt": 1752710400000,
+     "Address": "4321 Lassiter at North Hills Avenue, Suite 250, Raleigh, NC, 27609",
+     "PYMNT_ID_Ref": "0000283145"
+    }
+   }
+  ]
+ },
+ "madison-csv": "Check,Vendor,Name,Amount,Check Date,Address Line 1,Address Line 2,Address Line 3,City,State,Zip,Year\r\n206678,710219,MARIOS TAILING LLC,60.00,01/25/2024,3557 UNIVERSITY AVENUE,,,MADISON,WI,53705,2024\r\n210502,999993,AVID X CHANGE INC.,52.91,03/14/2024,PO BOX 36250,,,CHARLOTTE,NC,28236,2024\r\n214154,999994,\"201 MARBELLA, LLC\",503.25,05/23/2024,6302 MINERAL POINT RD UNIT 201,,,MADISON,WI,53705,2024\r\n"
 }

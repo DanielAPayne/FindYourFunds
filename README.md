@@ -22,9 +22,10 @@ browser.
 - **Backup, restore, and clear**, with optional passphrase encryption (AES-GCM).
 
 - **A city and county check**: enter a name, and the page searches the uncashed-check and
-  unclaimed-property lists published by Providence, Ramsey County, Marin County, Sonoma
-  County, Roseville, and Austin. These are queried live on each government's open-data
-  portal, so results are current and no copies of the lists are kept here.
+  unclaimed-property lists published by 10 local governments: Providence, Ramsey County,
+  Marin County, Sonoma County, Roseville, Austin, Sacramento County (two lists), Raleigh,
+  and Madison. These are queried live on each government's data service, so results are
+  current and no copies of the lists are kept here.
 - **A failed-bank check**: enter a bank you used, and the page searches the FDIC's list of
   failed and assisted banks since 1934 and explains what happened to depositors' money.
 - **A back-wage check**: enter a past employer and state, and the page searches U.S.

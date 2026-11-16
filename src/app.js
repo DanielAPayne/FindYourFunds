@@ -490,7 +490,7 @@
 
   // ---------- city and county lists (queried live) ----------
   const Fx = window.FYFLocal;
-  $("localPlaces").textContent = Fx.LOCAL_SOURCES.map((s) => `${s.place}, ${s.state}`).join("; ");
+  $("localPlaces").textContent = [...new Set(Fx.LOCAL_SOURCES.map((s) => `${s.place}, ${s.state}`))].join("; ");
 
   function localStatus(text, isError) {
     const s = $("localStatus");
@@ -498,20 +498,28 @@
     s.classList.toggle("error", !!isError);
   }
 
+  const csvCache = {};
   async function querySource(src, query) {
     const url = Fx.buildLocalUrl(src, query);
-    const res = await fetch(url, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(20000) });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const rows = await res.json();
+    let body;
+    if (src.platform === "csv" && csvCache[src.id]) body = csvCache[src.id];
+    else {
+      const res = await fetch(url, { headers: { accept: src.platform === "csv" ? "text/csv" : "application/json" }, signal: AbortSignal.timeout(20000) });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      body = src.platform === "csv" ? await res.text() : await res.json();
+      if (src.platform === "csv") csvCache[src.id] = body;
+    }
+    const { rows, truncated } = Fx.parseLocalResponse(src, body);
     const results = Fx.localResults(src, rows, query);
-    results.truncated = Array.isArray(rows) && rows.length >= Fx.LOCAL_LIMIT;
+    results.truncated = truncated;
     return results;
   }
+  function sourceLabel(src) { return `${src.place}, ${src.state}${src.list ? " (" + src.list + ")" : ""}`; }
 
   function saveLocalToNotes(r) {
     const rec0 = rec("local-funds");
     const amt = r.cents !== null ? C.formatCents(r.cents) : "amount not listed";
-    const line = `${r.place}, ${r.state}: ${r.name}, ${amt}${r.date ? ", " + fmtDate(r.date) : ""}`;
+    const line = `${r.place}, ${r.state}: ${r.name}, ${amt}${r.date ? ", " + fmtDate(r.date) : ""}${r.ref ? ", ref " + r.ref : ""}`;
     if (rec0.notes.includes(line)) return false;
     rec0.notes = rec0.notes ? rec0.notes + " | " + line : line;
     persist();
@@ -526,12 +534,13 @@
       const save = el("button", { class: "btn", type: "button", text: "Save to my notes" });
       save.addEventListener("click", () => { save.textContent = saveLocalToNotes(r) ? "Saved to local funds notes" : "Already in your notes"; save.disabled = true; });
       const facts = [r.cents !== null ? C.formatCents(r.cents) : "Amount not published", r.date ? fmtDate(r.date) : "", r.location].filter(Boolean).join(" · ");
-      list.append(el("li", null, el("h3", { text: r.name }), el("p", { class: "amount", text: facts }),
+      const extra = r.extras.length ? el("p", { text: r.extras.map((e) => `${e.label}: ${e.value}`).join(" · ") }) : null;
+      list.append(el("li", null, el("h3", { text: r.name }), el("p", { class: "amount", text: facts }), extra,
         el("div", { class: "actions" }, el("a", { class: "btn", href: src.claimUrl, target: "_blank", rel: "noopener noreferrer", text: "How to claim" }), save)));
     }
     const more = results.length > 25 ? el("p", { class: "claim", text: `Showing 25 of ${results.length}. Add a first name to narrow the list.` }) : null;
     return el("div", { class: "local-group" },
-      el("h3", { text: `${src.place}, ${src.state}` }),
+      el("h3", { text: sourceLabel(src) }),
       el("p", { class: "claim", text: `${src.what}. ${src.claim}` }),
       list, more);
   }
@@ -551,7 +560,7 @@
     let hits = 0, failed = 0, people = 0, truncated = 0;
     settled.forEach((res, i) => {
       const src = Fx.LOCAL_SOURCES[i];
-      const label = `${src.place}, ${src.state}`;
+      const label = sourceLabel(src);
       if (res.status === "rejected") {
         failed++;
         cov.append(el("li", { class: "fail", text: `${label}: couldn't search` }));
