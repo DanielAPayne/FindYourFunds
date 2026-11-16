@@ -1,13 +1,288 @@
 {
   "format": "fyf-whd-index",
   "version": 1,
-  "status": "not_built",
-  "generated": null,
+  "generated": "2026-11-16T22:23:06.416Z",
   "source": {
     "name": "U.S. Department of Labor, Wage and Hour Division: Enforcement data",
     "url": "https://dataportal.dol.gov/",
-    "records_read": 0
+    "records_read": 370964
   },
-  "total_cases": 0,
-  "states": {}
+  "total_cases": 208500,
+  "states": {
+    "AK": {
+      "file": "AK.json",
+      "cases": 316,
+      "bytes": 39421
+    },
+    "AL": {
+      "file": "AL.json",
+      "cases": 3853,
+      "bytes": 456446
+    },
+    "AR": {
+      "file": "AR.json",
+      "cases": 3133,
+      "bytes": 380233
+    },
+    "AZ": {
+      "file": "AZ.json",
+      "cases": 3410,
+      "bytes": 402578
+    },
+    "CA": {
+      "file": "CA.json",
+      "cases": 14436,
+      "bytes": 1712126
+    },
+    "CO": {
+      "file": "CO.json",
+      "cases": 3796,
+      "bytes": 454806
+    },
+    "CT": {
+      "file": "CT.json",
+      "cases": 2081,
+      "bytes": 242845
+    },
+    "DC": {
+      "file": "DC.json",
+      "cases": 357,
+      "bytes": 43603
+    },
+    "DE": {
+      "file": "DE.json",
+      "cases": 331,
+      "bytes": 40109
+    },
+    "FL": {
+      "file": "FL.json",
+      "cases": 16502,
+      "bytes": 2025182
+    },
+    "GA": {
+      "file": "GA.json",
+      "cases": 6471,
+      "bytes": 775462
+    },
+    "GU": {
+      "file": "GU.json",
+      "cases": 474,
+      "bytes": 55367
+    },
+    "HI": {
+      "file": "HI.json",
+      "cases": 1393,
+      "bytes": 165612
+    },
+    "IA": {
+      "file": "IA.json",
+      "cases": 2349,
+      "bytes": 276368
+    },
+    "ID": {
+      "file": "ID.json",
+      "cases": 1291,
+      "bytes": 151535
+    },
+    "IL": {
+      "file": "IL.json",
+      "cases": 6216,
+      "bytes": 742915
+    },
+    "IN": {
+      "file": "IN.json",
+      "cases": 2693,
+      "bytes": 320702
+    },
+    "KS": {
+      "file": "KS.json",
+      "cases": 2794,
+      "bytes": 327600
+    },
+    "KY": {
+      "file": "KY.json",
+      "cases": 2305,
+      "bytes": 273465
+    },
+    "LA": {
+      "file": "LA.json",
+      "cases": 3732,
+      "bytes": 455347
+    },
+    "MA": {
+      "file": "MA.json",
+      "cases": 3611,
+      "bytes": 431599
+    },
+    "MD": {
+      "file": "MD.json",
+      "cases": 2375,
+      "bytes": 289242
+    },
+    "ME": {
+      "file": "ME.json",
+      "cases": 884,
+      "bytes": 103678
+    },
+    "MI": {
+      "file": "MI.json",
+      "cases": 5991,
+      "bytes": 718351
+    },
+    "MN": {
+      "file": "MN.json",
+      "cases": 1842,
+      "bytes": 220645
+    },
+    "MO": {
+      "file": "MO.json",
+      "cases": 4694,
+      "bytes": 564314
+    },
+    "MP": {
+      "file": "MP.json",
+      "cases": 547,
+      "bytes": 62215
+    },
+    "MS": {
+      "file": "MS.json",
+      "cases": 2774,
+      "bytes": 331340
+    },
+    "MT": {
+      "file": "MT.json",
+      "cases": 330,
+      "bytes": 38735
+    },
+    "NC": {
+      "file": "NC.json",
+      "cases": 7773,
+      "bytes": 935287
+    },
+    "ND": {
+      "file": "ND.json",
+      "cases": 318,
+      "bytes": 36797
+    },
+    "NE": {
+      "file": "NE.json",
+      "cases": 1893,
+      "bytes": 217638
+    },
+    "NH": {
+      "file": "NH.json",
+      "cases": 1436,
+      "bytes": 173087
+    },
+    "NJ": {
+      "file": "NJ.json",
+      "cases": 5920,
+      "bytes": 708438
+    },
+    "NM": {
+      "file": "NM.json",
+      "cases": 1884,
+      "bytes": 225660
+    },
+    "NV": {
+      "file": "NV.json",
+      "cases": 1592,
+      "bytes": 188439
+    },
+    "NY": {
+      "file": "NY.json",
+      "cases": 12792,
+      "bytes": 1528398
+    },
+    "OH": {
+      "file": "OH.json",
+      "cases": 6012,
+      "bytes": 711782
+    },
+    "OK": {
+      "file": "OK.json",
+      "cases": 3439,
+      "bytes": 405175
+    },
+    "OR": {
+      "file": "OR.json",
+      "cases": 1305,
+      "bytes": 152591
+    },
+    "PA": {
+      "file": "PA.json",
+      "cases": 8377,
+      "bytes": 1018914
+    },
+    "PR": {
+      "file": "PR.json",
+      "cases": 2812,
+      "bytes": 344279
+    },
+    "RI": {
+      "file": "RI.json",
+      "cases": 1074,
+      "bytes": 128773
+    },
+    "SC": {
+      "file": "SC.json",
+      "cases": 3289,
+      "bytes": 395784
+    },
+    "SD": {
+      "file": "SD.json",
+      "cases": 993,
+      "bytes": 117083
+    },
+    "TN": {
+      "file": "TN.json",
+      "cases": 4540,
+      "bytes": 538070
+    },
+    "TX": {
+      "file": "TX.json",
+      "cases": 26861,
+      "bytes": 3167150
+    },
+    "UT": {
+      "file": "UT.json",
+      "cases": 2573,
+      "bytes": 306573
+    },
+    "VA": {
+      "file": "VA.json",
+      "cases": 5248,
+      "bytes": 633181
+    },
+    "VI": {
+      "file": "VI.json",
+      "cases": 65,
+      "bytes": 8391
+    },
+    "VT": {
+      "file": "VT.json",
+      "cases": 657,
+      "bytes": 79113
+    },
+    "WA": {
+      "file": "WA.json",
+      "cases": 2268,
+      "bytes": 268654
+    },
+    "WI": {
+      "file": "WI.json",
+      "cases": 1979,
+      "bytes": 235220
+    },
+    "WV": {
+      "file": "WV.json",
+      "cases": 1904,
+      "bytes": 229192
+    },
+    "WY": {
+      "file": "WY.json",
+      "cases": 515,
+      "bytes": 60773
+    }
+  }
 }
