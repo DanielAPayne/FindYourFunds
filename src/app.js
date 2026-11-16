@@ -400,6 +400,94 @@
     for (const c of results) list.append(renderCase(c, st));
   });
 
+  // ---------- failed-bank check ----------
+  const FDIC_FUNDS_URL = "https://closedbanks.fdic.gov/funds/";
+  let fdicPromise = null;
+
+  function bankStatus(text, isError) {
+    const s = $("bankStatus");
+    s.textContent = text;
+    s.classList.toggle("error", !!isError);
+  }
+
+  const bankSel = $("bankState");
+  bankSel.append(el("option", { value: "", text: "Any state" }));
+  for (const st of Lx.US_STATES) bankSel.append(el("option", { value: st, text: st }));
+
+  // Loaded on the first search, not on page load (it's about 400 KB).
+  function loadFdic() {
+    if (!fdicPromise) {
+      fdicPromise = fetch("data/fdic/failures.json", { cache: "no-cache" })
+        .then((res) => { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
+        .then((obj) => {
+          const f = Lx.parseFdicFile(obj);
+          if (f.status === "not_built" || !f.rows.length) { const e = new Error("not built"); e.notBuilt = true; throw e; }
+          $("bankSource").textContent = `Source: FDIC BankFind failures list, ${f.rows.length.toLocaleString("en-US")} failed or assisted banks since 1934, updated ${fmtDate(f.generated.slice(0, 10))}.`;
+          return f;
+        })
+        .catch((e) => { fdicPromise = null; throw e; });
+    }
+    return fdicPromise;
+  }
+
+  function saveBankToNotes(c, d) {
+    const r = rec("fdic-unclaimed");
+    const line = `FDIC: ${Lx.titleCase(c.name)} (${Lx.titleCase(c.city)}, ${c.state}), ${c.date ? fmtDate(c.date) : "date not recorded"}: ${d.label}`;
+    if (r.notes.includes(line)) return false;
+    r.notes = r.notes ? r.notes + " | " + line : line;
+    persist();
+    const notesEl = $("notes-fdic-unclaimed");
+    if (notesEl) notesEl.value = r.notes;
+    return true;
+  }
+
+  function renderBank(c) {
+    const d = Lx.describeBankCase(c);
+    const assisted = Lx.FDIC_TYPES[c.type] && Lx.FDIC_TYPES[c.type].group === "assisted";
+    const when = c.date ? `${assisted ? "FDIC action" : "Failed"} ${fmtDate(c.date)}` : (assisted ? "FDIC action, date not recorded" : "Failure date not recorded");
+    const save = el("button", { class: "btn", type: "button", text: "Save to my notes" });
+    save.addEventListener("click", () => {
+      save.textContent = saveBankToNotes(c, d) ? "Saved to FDIC unclaimed funds notes" : "Already in your notes";
+      save.disabled = true;
+    });
+    const actions = el("div", { class: "actions" });
+    if (d.check) actions.append(el("a", { class: "btn", href: FDIC_FUNDS_URL, target: "_blank", rel: "noopener noreferrer", text: "Search FDIC unclaimed funds" }));
+    actions.append(save);
+    return el("li", { class: d.check ? "lead" : null },
+      el("h3", { text: Lx.titleCase(c.name) }),
+      el("p", { text: `${Lx.titleCase(c.city)}, ${c.state} · ${when}` }),
+      el("p", { class: "amount", text: d.label + (d.check ? " · worth checking" : "") }),
+      el("p", { text: d.detail }),
+      actions);
+  }
+
+  $("bankForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const name = $("bankName").value.trim();
+    const st = $("bankState").value;
+    const list = $("bankResults");
+    list.replaceChildren();
+    if (name.length < 2) { bankStatus("Enter at least two letters of the bank's name.", true); return; }
+    bankStatus("Loading the FDIC list…");
+    let f;
+    try { f = await loadFdic(); }
+    catch (e) {
+      if (e.notBuilt) bankStatus("This search isn't available yet. It turns on after the first download of FDIC data.");
+      else bankStatus(`The search couldn't be completed (${e.message}). This isn't the same as finding nothing; try again later.`, true);
+      return;
+    }
+    const results = Lx.searchBanks(f.rows, name, { state: st, limit: 50 });
+    if (!results.length) {
+      bankStatus(`No failed or FDIC-assisted bank matches "${name}"${st ? " in " + st : ""}. Banks that never failed aren't on this list. If an account there went unused, check your state's unclaimed property.`);
+      return;
+    }
+    const leads = results.filter((c) => Lx.describeBankCase(c).check).length;
+    bankStatus(`${results.length === 50 ? "First 50" : results.length} matching bank${results.length === 1 ? "" : "s"}. ` +
+      (leads ? `${leads} ${leads === 1 ? "was" : "were"} handled in a way where unclaimed money is possible.`
+        : `${results.length === 1 ? "Its" : "Their"} accounts moved to another bank or continued, so unclaimed money is unlikely.`));
+    for (const c of results) list.append(renderBank(c));
+  });
+
   updateTotals();
   applyView();
   initWages();

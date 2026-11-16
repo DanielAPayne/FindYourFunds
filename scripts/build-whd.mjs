@@ -80,6 +80,27 @@ if (!records.length) { console.error("No records returned; not publishing an emp
 L.checkWhdFields(records);
 
 const shards = L.buildWhdShards(records);
+
+// If every state's cases match what's already published, leave the files alone so
+// a monthly run with no new DOL data doesn't commit 24 MB of identical rows.
+function unchanged() {
+  try {
+    const old = JSON.parse(readFileSync(join(outDir, "index.json"), "utf8"));
+    if (old.status === "not_built") return false;
+    const oldStates = Object.keys(old.states || {}).sort();
+    if (JSON.stringify(oldStates) !== JSON.stringify(Object.keys(shards).sort())) return false;
+    for (const st of oldStates) {
+      const prev = JSON.parse(readFileSync(join(outDir, old.states[st].file), "utf8"));
+      if (JSON.stringify(prev.rows) !== JSON.stringify(shards[st])) return false;
+    }
+    return true;
+  } catch (e) { return false; }
+}
+if (unchanged()) {
+  console.log(`No change: same ${Object.keys(shards).length} states and cases as the published files. Leaving them untouched.`);
+  process.exit(0);
+}
+
 const generated = new Date().toISOString();
 mkdirSync(outDir, { recursive: true });
 for (const f of readdirSync(outDir)) if (f.endsWith(".json")) unlinkSync(join(outDir, f));

@@ -149,7 +149,135 @@
     return obj;
   }
 
-  const api = { WHD_COLUMNS, WHD_SOURCE_FIELDS, US_STATES, normalizeEmployer, checkWhdFields, buildWhdShards, searchEmployer, parseShard, rowToCase };
+  // ---------------------------------------------------------------------------
+  // FDIC failed and assisted banks (FDIC BankFind "failures" data, 1934 on).
+  // A match means a bank failed or received FDIC assistance. Whether a depositor
+  // might have unclaimed money depends on how it was resolved (see FDIC_TYPES).
+  // ---------------------------------------------------------------------------
+  const FDIC_COLUMNS = ["cert", "name", "city", "state", "date", "type", "acquirer", "acquirer_city", "acquirer_state"];
+  const FDIC_REQUIRED = ["NAME", "PSTALP", "FAILDATE", "RESTYPE1"];
+
+  // FDIC transaction types (RESTYPE1), from FDIC's failure_properties definitions.
+  // ABT is grouped with IDT and DINB with payouts by those definitions; OBAM is
+  // open-bank assistance. `check` marks resolutions worth searching FDIC unclaimed funds.
+  const FDIC_TYPES = {
+    PO:    { group: "payout",   check: true,  label: "FDIC paid depositors directly" },
+    DINB:  { group: "payout",   check: true,  label: "FDIC paid depositors through a temporary bank" },
+    IDT:   { group: "transfer", check: true,  label: "Insured deposits paid out by another bank" },
+    ABT:   { group: "transfer", check: true,  label: "Insured deposits paid out by another bank" },
+    PI:    { group: "insured",  check: true,  label: "Only insured deposits moved to another bank" },
+    PA:    { group: "assumed",  check: false, label: "All deposits moved to another bank" },
+    "P&A": { group: "assumed",  check: false, label: "Deposits moved to another bank" },
+    "A/A": { group: "assisted", check: false, label: "FDIC assisted the bank" },
+    OBAM:  { group: "assisted", check: false, label: "FDIC assistance while the bank stayed open" },
+    REP:   { group: "assisted", check: false, label: "Taken over by regulators, then sold" },
+    MGR:   { group: "assisted", check: false, label: "Run by regulators before being sold" },
+  };
+
+  /* What a resolution means for someone who had an account there. */
+  function describeBankCase(c) {
+    const t = FDIC_TYPES[c.type];
+    const acq = c.acquirer ? titleCase(c.acquirer) : "";
+    if (!t) return { label: `Resolution type ${c.type || "not recorded"}`, check: true,
+      detail: "The FDIC's record doesn't say how deposits were handled. Search FDIC unclaimed funds to be sure." };
+    const detail = {
+      payout: "There was no successor bank. The FDIC paid insured depositors directly, and money nobody collected may still be held by the FDIC or turned over to the state's unclaimed property program.",
+      transfer: `${acq || "Another bank"} paid insured deposits on the FDIC's behalf. Payments nobody collected may still be held by the FDIC or the state.`,
+      insured: `Insured deposits moved to ${acq || "another bank"}. Amounts above the insurance limit were handled by the FDIC as receiver, which may have paid uninsured depositors a share later.`,
+      assumed: `Accounts moved to ${acq || "the acquiring bank"} and usually continued there. If the account later went unused, check that bank or your state's unclaimed property.`,
+      assisted: "The bank generally stayed open, so accounts usually continued as normal.",
+    }[t.group];
+    return { label: t.label, check: t.check, detail };
+  }
+
+  // FDIC names are all caps. Title-case them for reading, but keep abbreviations
+  // (words with no vowels, like NCNB or FSB) and a few known forms intact.
+  const NAME_FORMS = { NA: "NA", "N.A.": "N.A.", "N.A": "N.A.", USA: "USA", "S&LA": "S&LA", "FS&LA": "FS&LA", SSB: "SSB", FSB: "FSB", JPMORGAN: "JPMorgan", "A&M": "A&M" };
+  function titleCase(s) {
+    return String(s || "").split(/(\s+|-|\/)/).map((tok) => {
+      const up = tok.toUpperCase();
+      if (NAME_FORMS[up]) return NAME_FORMS[up];
+      // Vowel-less words are abbreviations (NCNB, FSB), except short ones like FT. or MT.
+      if (/^[A-Z&.]+$/.test(up) && !/[AEIOUY]/.test(up) && !/^[A-Z]{1,2}\.$/.test(up)) return up;
+      const lower = tok.toLowerCase();
+      return lower.replace(/^([^a-z]*)([a-z])/, (m, pre, ch) => pre + ch.toUpperCase());
+    }).join("");
+  }
+
+  /* "7/17/2026" -> "2026-07-17"; "" when malformed or impossible. */
+  function parseFdicDate(v, maxYear) {
+    const m = String(v || "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!m) return "";
+    const y = Number(m[3]);
+    if (y < 1930 || y > (maxYear || new Date().getUTCFullYear() + 1)) return "";
+    return `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+  }
+
+  function unwrapFdic(body) {
+    const list = Array.isArray(body) ? body : body && body.data;
+    if (!Array.isArray(list)) throw new Error("Unexpected FDIC response shape.");
+    return list.map((x) => (x && x.data && typeof x.data === "object" ? x.data : x));
+  }
+
+  /* FDIC API body (or plain records) -> rows sorted newest first. Throws if fields are missing. */
+  function buildFdicRows(body, opts) {
+    const recs = unwrapFdic(body);
+    const keys = new Set();
+    for (const r of recs.slice(0, 200)) for (const k of Object.keys(r)) keys.add(k);
+    const missing = FDIC_REQUIRED.filter((k) => !keys.has(k));
+    if (missing.length) throw new Error(`FDIC data is missing expected fields: ${missing.join(", ")}. Fields present: ${[...keys].sort().join(", ")}`);
+    const clean = (v) => { const s = String(v == null ? "" : v).trim(); return s === "0" ? "" : s; };
+    const rows = recs.map((r) => [
+      clean(r.CERT), clean(r.NAME), clean(r.CITY), clean(r.PSTALP).toUpperCase(),
+      parseFdicDate(r.FAILDATE, opts && opts.maxYear), clean(r.RESTYPE1),
+      clean(r.BIDNAME), clean(r.BIDCITY), clean(r.BIDSTATE).toUpperCase(),
+    ]).filter((row) => row[1]);
+    rows.sort((a, b) => (b[4] || "").localeCompare(a[4] || "") || a[1].localeCompare(b[1]));
+    return rows;
+  }
+
+  function bankRowToCase(row) {
+    const o = {};
+    FDIC_COLUMNS.forEach((c, i) => { o[c] = row[i]; });
+    return o;
+  }
+
+  /* Search failed-bank names. Every query word must start a word in the name; exact names first. */
+  function searchBanks(rows, query, opts) {
+    const limit = (opts && opts.limit) || 50;
+    const state = String((opts && opts.state) || "").toUpperCase();
+    const q = normalizeEmployer(query);
+    if (q.length < 2) return [];
+    const qWords = q.split(" ");
+    const out = [];
+    for (const row of rows) {
+      if (state && row[3] !== state) continue;
+      const n = normalizeEmployer(row[1]);
+      const core = n.replace(/\b(bank|n a|na|fsb|ssb)\b/g, " ").replace(/\s+/g, " ").trim();
+      let score = 0;
+      if (n === q || core === q) score = 3;
+      else {
+        const words = n.split(" ");
+        if (qWords.every((qw) => words.some((w) => w.startsWith(qw)))) score = n.startsWith(q) ? 2 : 1;
+      }
+      if (score) out.push({ score, row });
+    }
+    out.sort((a, b) => b.score - a.score || (b.row[4] || "").localeCompare(a.row[4] || ""));
+    return out.slice(0, limit).map((x) => Object.assign(bankRowToCase(x.row), { score: x.score }));
+  }
+
+  function parseFdicFile(obj) {
+    if (!obj || obj.format !== "fyf-fdic-failures" || obj.version !== 1 || !Array.isArray(obj.rows)) {
+      throw new Error("Failed-bank data file is missing or damaged.");
+    }
+    if (JSON.stringify(obj.columns) !== JSON.stringify(FDIC_COLUMNS)) throw new Error("Failed-bank data file has an unexpected layout.");
+    return obj;
+  }
+
+  const api = {
+    WHD_COLUMNS, WHD_SOURCE_FIELDS, US_STATES, normalizeEmployer, checkWhdFields, buildWhdShards, searchEmployer, parseShard, rowToCase,
+    FDIC_COLUMNS, FDIC_TYPES, describeBankCase, parseFdicDate, buildFdicRows, searchBanks, parseFdicFile, bankRowToCase, titleCase,
+  };
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.FYFLeads = api;
 })(typeof self !== "undefined" ? self : this);

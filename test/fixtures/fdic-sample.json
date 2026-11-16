@@ -1,0 +1,217 @@
+{
+ "data": [
+  {
+   "data": {
+    "BIDCITY": "0",
+    "BIDSTATE": "0",
+    "CITY": "BRIDGEPORT",
+    "BIDNAME": "0",
+    "PSTALP": "CT",
+    "FAILDATE": "9/13/2013",
+    "CERT": 57041,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "PO",
+    "NAME": "THE COMMUNITY'S BANK",
+    "ID": "4055"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "0",
+    "BIDSTATE": "0",
+    "CITY": "CAMBRIDGE",
+    "BIDNAME": "0",
+    "PSTALP": "MD",
+    "FAILDATE": "4/27/2012",
+    "CERT": 26759,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "DINB",
+    "NAME": "BANK OF THE EASTERN SHORE",
+    "ID": "4001"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "ENGLEWOOD",
+    "BIDSTATE": "OH",
+    "CITY": "DENVER",
+    "BIDNAME": "COLUMBIA SAVINGS, A FS&LA",
+    "PSTALP": "CO",
+    "FAILDATE": "12/9/1988",
+    "CERT": 30760,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "ABT",
+    "NAME": "SILVERADO S&LA",
+    "ID": "1999"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "0",
+    "BIDSTATE": "0",
+    "CITY": "CHARLOTTE",
+    "BIDNAME": "0",
+    "PSTALP": "NC",
+    "FAILDATE": "1/16/2009",
+    "CERT": 3510,
+    "RESTYPE": "ASSISTANCE",
+    "RESTYPE1": "OBAM",
+    "NAME": "BANK OF AMERICA N.A.",
+    "ID": "3586"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "PALM BEACH GARDENS",
+    "BIDSTATE": "FL",
+    "CITY": "LAGRANGE",
+    "BIDNAME": "ANCHOR BANK",
+    "PSTALP": "GA",
+    "FAILDATE": "5/1/2026",
+    "CERT": 25796,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "PI",
+    "NAME": "COMMUNITY BANK AND TRUST - WEST GEORGIA",
+    "ID": "4115"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "PRINCETON",
+    "BIDSTATE": "TX",
+    "CITY": "PRINCETON",
+    "BIDNAME": "CITIZENS STATE BANK",
+    "PSTALP": "TX",
+    "FAILDATE": "12/10/1992",
+    "CERT": 9015,
+    "RESTYPE": "ASSISTANCE",
+    "RESTYPE1": "A/A",
+    "NAME": "CITIZENS STATE BANK",
+    "ID": "3426"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "INGLEWOOD",
+    "BIDSTATE": "CA",
+    "CITY": "LOS ANGELES",
+    "BIDNAME": "IMPERIAL BANK",
+    "PSTALP": "CA",
+    "FAILDATE": "1/20/1995",
+    "CERT": 24754,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "IDT",
+    "NAME": "GUARDIAN BANK",
+    "ID": "3498"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "0",
+    "BIDSTATE": "0",
+    "CITY": "HOUSTON",
+    "BIDNAME": "0",
+    "PSTALP": "TX",
+    "FAILDATE": "10/12/1979",
+    "CERT": 20237,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "P&A",
+    "NAME": "AMERICAN NATIONAL BANK",
+    "ID": "559"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "0",
+    "BIDSTATE": "0",
+    "CITY": "DELRAY BEACH",
+    "BIDNAME": "0",
+    "PSTALP": "FL",
+    "FAILDATE": "10/6/1988",
+    "CERT": 32155,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "MGR",
+    "NAME": "FINANCIAL SECURITY S&LA",
+    "ID": "1949"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "CARTERSVILLE",
+    "BIDSTATE": "GA",
+    "CITY": "CARTERSVILLE",
+    "BIDNAME": "PRUDENTIAL SAVINGS BANK FSB",
+    "PSTALP": "GA",
+    "FAILDATE": "3/30/1989",
+    "CERT": 29160,
+    "RESTYPE": "ASSISTANCE",
+    "RESTYPE1": "REP",
+    "NAME": "CARTERSVILLE FSB OF GEORGIA",
+    "ID": "2300"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "COLUMBUS",
+    "BIDSTATE": "OH",
+    "CITY": "HENDERSON",
+    "BIDNAME": "JPMORGAN CHASE BANK, NA",
+    "PSTALP": "NV",
+    "FAILDATE": "9/25/2008",
+    "CERT": 32633,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "PA",
+    "NAME": "WASHINGTON MUTUAL BANK",
+    "ID": "3568"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "RALEIGH",
+    "BIDSTATE": "NC",
+    "CITY": "SANTA CLARA",
+    "BIDNAME": "FIRST-CITIZENS BANK & TRUST COMPANY",
+    "PSTALP": "CA",
+    "FAILDATE": "3/10/2023",
+    "CERT": 24735,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "PA",
+    "NAME": "SILICON VALLEY BANK",
+    "ID": "4105"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "COLUMBUS",
+    "BIDSTATE": "OH",
+    "CITY": "SAN FRANCISCO",
+    "BIDNAME": "JPMORGAN CHASE BANK, N.A.",
+    "PSTALP": "CA",
+    "FAILDATE": "5/1/2023",
+    "CERT": 59017,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "PA",
+    "NAME": "FIRST REPUBLIC BANK",
+    "ID": "4107"
+   }
+  },
+  {
+   "data": {
+    "BIDCITY": "DALLAS",
+    "BIDSTATE": "TX",
+    "CITY": "DALLAS",
+    "BIDNAME": "NCNB TEXAS NATIONAL BANK",
+    "PSTALP": "TX",
+    "FAILDATE": "7/29/1988",
+    "CERT": 3165,
+    "RESTYPE": "FAILURE",
+    "RESTYPE1": "PA",
+    "NAME": "FIRST REPUBLICBANK-DALLAS, N.A.",
+    "ID": "1812"
+   }
+  }
+ ],
+ "totals": {
+  "count": 14
+ }
+}
