@@ -53,10 +53,14 @@
     const n = Number(String(v).replace(/[$,]/g, ""));
     return Number.isFinite(n) ? Math.round(n * 100) : 0;
   }
-  function toDate(v) {
+  /* YYYY-MM-DD, or "" when missing or impossible (DOL data has typos like 0200 and 3021). */
+  function toDate(v, maxYear) {
     if (!v) return "";
     const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    return m ? `${m[1]}-${m[2]}-${m[3]}` : "";
+    if (!m) return "";
+    const y = Number(m[1]);
+    if (y < 1950 || y > maxYear) return "";
+    return `${m[1]}-${m[2]}-${m[3]}`;
   }
 
   /* Throws if the source data is missing a required field. Returns the field map that was found. */
@@ -77,7 +81,8 @@
   }
 
   /* Raw DOL records -> { [state]: rows[] } for records with back wages owed. */
-  function buildWhdShards(records) {
+  function buildWhdShards(records, opts) {
+    const maxYear = (opts && opts.maxYear) || new Date().getUTCFullYear() + 1;
     const shards = {};
     for (const r of records) {
       const cents = toCents(pick(r, WHD_SOURCE_FIELDS.back_wages));
@@ -90,8 +95,8 @@
         String(pick(r, WHD_SOURCE_FIELDS.trade_name) || "").trim(),
         String(pick(r, WHD_SOURCE_FIELDS.city) || "").trim(),
         String(pick(r, WHD_SOURCE_FIELDS.zip) || "").trim().slice(0, 5),
-        toDate(pick(r, WHD_SOURCE_FIELDS.start)),
-        toDate(pick(r, WHD_SOURCE_FIELDS.end)),
+        toDate(pick(r, WHD_SOURCE_FIELDS.start), maxYear),
+        toDate(pick(r, WHD_SOURCE_FIELDS.end), maxYear),
         cents,
         Number(pick(r, WHD_SOURCE_FIELDS.employees)) || 0,
       ];
