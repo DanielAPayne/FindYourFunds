@@ -305,6 +305,102 @@
     location.reload();
   });
 
+  // ---------- back-wage lead finder ----------
+  const Lx = window.FYFLeads;
+  const WOW_URL = "https://www.dol.gov/agencies/whd/wow";
+  const shardCache = {};
+  let whdIndex = null;
+
+  function wageStatus(text, isError) {
+    const s = $("wageStatus");
+    s.textContent = text;
+    s.classList.toggle("error", !!isError);
+  }
+  function fmtMB(bytes) { return bytes > 1e6 ? (bytes / 1e6).toFixed(1) + " MB" : Math.max(1, Math.round(bytes / 1e3)) + " KB"; }
+
+  async function initWages() {
+    const form = $("wageForm");
+    try {
+      const res = await fetch("data/whd/index.json", { cache: "no-cache" });
+      if (!res.ok) throw new Error("missing");
+      const idx = await res.json();
+      if (!idx || idx.format !== "fyf-whd-index" || idx.version !== 1) throw new Error("bad");
+      if (idx.status === "not_built" || !Object.keys(idx.states || {}).length) throw new Error("not built");
+      whdIndex = idx;
+    } catch (e) {
+      form.querySelectorAll("input, select, button").forEach((n) => { n.disabled = true; });
+      wageStatus("This search isn't available yet. It turns on after the first download of Department of Labor data.");
+      return;
+    }
+    const sel = $("wageState");
+    sel.append(el("option", { value: "", text: "Choose a state" }));
+    for (const st of Object.keys(whdIndex.states).sort()) sel.append(el("option", { value: st, text: st }));
+    $("wageSource").textContent = `Source: U.S. Department of Labor, Wage and Hour Division enforcement data. ` +
+      `${whdIndex.total_cases.toLocaleString("en-US")} cases with back wages, updated ${fmtDate(whdIndex.generated.slice(0, 10))}.`;
+  }
+
+  async function loadShard(st) {
+    if (shardCache[st]) return shardCache[st];
+    const info = whdIndex.states[st];
+    if (!info) throw new Error("no data for that state");
+    wageStatus(`Loading ${st} records (${fmtMB(info.bytes)})…`);
+    const res = await fetch("data/whd/" + info.file, { cache: "no-cache" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return (shardCache[st] = Lx.parseShard(await res.json()));
+  }
+
+  function saveCaseToNotes(c, st) {
+    const r = rec("dol-wow");
+    const line = `DOL case ${c.case_id}: ${c.trade_name || c.legal_name}, ${c.city} ${st}, ${c.start || "?"} to ${c.end || "?"}`;
+    if (r.notes.includes(`DOL case ${c.case_id}:`)) return false;
+    r.notes = r.notes ? r.notes + " | " + line : line;
+    persist();
+    const notesEl = $("notes-dol-wow");
+    if (notesEl) notesEl.value = r.notes;
+    return true;
+  }
+
+  function renderCase(c, st) {
+    const name = c.trade_name && c.trade_name.toLowerCase() !== c.legal_name.toLowerCase()
+      ? `${c.trade_name} (${c.legal_name})` : (c.legal_name || c.trade_name);
+    const period = c.start || c.end ? `Findings period ${c.start ? fmtDate(c.start) : "?"} to ${c.end ? fmtDate(c.end) : "?"}` : "Findings period not listed";
+    const owed = `DOL found ${C.formatCents(c.back_wages_cents)} in back wages owed` +
+      (c.employees ? ` to ${c.employees.toLocaleString("en-US")} worker${c.employees === 1 ? "" : "s"}` : "");
+    const save = el("button", { class: "btn", type: "button", text: "Save to my notes" });
+    save.addEventListener("click", () => {
+      save.textContent = saveCaseToNotes(c, st) ? "Saved to Workers Owed Wages notes" : "Already in your notes";
+      save.disabled = true;
+    });
+    const wow = el("a", { class: "btn", href: WOW_URL, target: "_blank", rel: "noopener noreferrer", text: "Check Workers Owed Wages" });
+    return el("li", null,
+      el("h3", { text: name }),
+      el("p", { text: [c.city, st, c.zip].filter(Boolean).join(", ").replace(`, ${st}, `, `, ${st} `) + ` · Case ${c.case_id}` }),
+      el("p", { text: period }),
+      el("p", { class: "amount", text: owed }),
+      el("div", { class: "actions" }, wow, save));
+  }
+
+  $("wageForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const employer = $("wageEmployer").value.trim();
+    const st = $("wageState").value;
+    const list = $("wageResults");
+    list.replaceChildren();
+    if (employer.length < 2) { wageStatus("Enter at least two letters of the employer's name.", true); return; }
+    if (!st) { wageStatus("Choose the state where you worked.", true); return; }
+    let shard;
+    try { shard = await loadShard(st); }
+    catch (e) { wageStatus(`The search couldn't be completed (${e.message}). This isn't the same as finding nothing; try again later.`, true); return; }
+    const results = Lx.searchEmployer(shard.rows, employer, { city: $("wageCity").value, limit: 50 });
+    if (!results.length) {
+      wageStatus(`No Department of Labor back-wage cases found for "${employer}" in ${st}. Try the company's legal name or a shorter name. This only covers cases DOL investigated, so wages can still be owed without a record here.`);
+      return;
+    }
+    wageStatus(`${results.length === 50 ? "First 50" : results.length} case${results.length === 1 ? "" : "s"} found. A case shows what an employer owed some workers, not what you are owed. Compare the city and dates with your own job.`);
+    for (const c of results) list.append(renderCase(c, st));
+  });
+
   updateTotals();
   applyView();
+  initWages();
 })();
