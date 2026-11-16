@@ -32,6 +32,19 @@ test("buildWhdShards keeps only cases with back wages, by U.S. state, newest fir
   assert.equal(L.rowToCase(shards.IL[1]).zip, "60601", "ZIP+4 trimmed to 5 digits");
 });
 
+test("buildWhdShards blanks impossible dates so typos don't sort as newest", () => {
+  const base = { case_id: "9", legal_name: "Typo Co", st_cd: "OH", bw_atp_amt: "10" };
+  const shards = L.buildWhdShards([
+    { ...base, case_id: "a", findings_start_date: "0200-10-30", findings_end_date: "3021-05-01" },
+    { ...base, case_id: "b", findings_start_date: "1900-01-07", findings_end_date: "2027-06-30" },
+    { ...base, case_id: "c", findings_start_date: "2020-01-01", findings_end_date: "2021-01-01" },
+  ], { maxYear: 2027 });
+  const byId = Object.fromEntries(shards.OH.map((r) => [r[0], r]));
+  assert.deepEqual([byId.a[5], byId.a[6]], ["", ""]);
+  assert.deepEqual([byId.b[5], byId.b[6]], ["", "2027-06-30"]);
+  assert.equal(shards.OH[shards.OH.length - 1][0], "a", "undated case sorts last");
+});
+
 test("searchEmployer matches legal or trade names by word prefix", () => {
   const { IL, MI } = L.buildWhdShards(sample);
   assert.deepEqual(L.searchEmployer(IL, "acme").map((c) => c.case_id).sort(), ["1001", "1002", "1005"]);
