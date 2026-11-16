@@ -153,6 +153,13 @@
     .wage-results { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 10px; }
     .wage-results li { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--bg); min-width: 0; }
     .wage-results li.lead { border-left: 4px solid var(--gold); }
+    .coverage { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    .coverage li { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink-soft); }
+    .coverage li.hit { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); font-weight: 600; }
+    .coverage li.fail { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 50%, var(--line)); }
+    .local-group { margin-top: 14px; }
+    .local-group h3 { font-family: var(--font-display); font-size: 15px; margin: 0 0 4px; }
+    .local-group .claim { margin: 0 0 8px; font-size: 13.5px; color: var(--ink-soft); }
     .wage-results h3 { font-family: var(--font-display); font-size: 15px; margin: 0 0 2px; overflow-wrap: anywhere; }
     .wage-results p { margin: 2px 0; font-size: 13.5px; color: var(--ink-soft); }
     .wage-results .amount { color: var(--ink); font-weight: 600; }
@@ -229,6 +236,19 @@
     <p id="bankStatus" role="status"></p>
     <ol id="bankResults" class="wage-results"></ol>
     <p class="meta" id="bankSource"></p>
+  </section>
+
+  <section class="panel" id="localPanel" aria-labelledby="localTitle">
+    <h2 id="localTitle">Check city and county lists</h2>
+    <p class="hint">Searches the uncashed-check and unclaimed-property lists that these local governments publish: <span id="localPlaces"></span>. Your search goes directly to each government's open-data portal, which is how their official search works. This site doesn't store it.</p>
+    <form id="localForm" class="wage-form">
+      <div class="field grow"><label for="localLast">Last name or business name</label><input id="localLast" autocomplete="off" minlength="2" required placeholder="e.g. Rivera, or Acme Plumbing"></div>
+      <div class="field"><label for="localFirst">First name (optional)</label><input id="localFirst" autocomplete="off"></div>
+      <button class="btn primary" type="submit" id="localGo">Search</button>
+    </form>
+    <p id="localStatus" role="status"></p>
+    <ul id="localCoverage" class="coverage"></ul>
+    <div id="localResults"></div>
   </section>
 
   <div class="rail" aria-label="Your ledger">
@@ -310,9 +330,10 @@
     <p>This is an information tool, not legal or financial advice.</p>
   </footer>
 </div>
-<script src="src/registry.js?v=0.5.0"></script>
-<script src="src/core.js?v=0.5.0"></script>
-<script src="src/leads.js?v=0.5.0"></script>
-<script src="src/app.js?v=0.5.0"></script>
+<script src="src/registry.js?v=0.6.0"></script>
+<script src="src/core.js?v=0.6.0"></script>
+<script src="src/leads.js?v=0.6.0"></script>
+<script src="src/local.js?v=0.6.0"></script>
+<script src="src/app.js?v=0.6.0"></script>
 </body>
 </html>

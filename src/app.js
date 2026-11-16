@@ -488,6 +488,89 @@
     for (const c of results) list.append(renderBank(c));
   });
 
+  // ---------- city and county lists (queried live) ----------
+  const Fx = window.FYFLocal;
+  $("localPlaces").textContent = Fx.LOCAL_SOURCES.map((s) => `${s.place}, ${s.state}`).join("; ");
+
+  function localStatus(text, isError) {
+    const s = $("localStatus");
+    s.textContent = text;
+    s.classList.toggle("error", !!isError);
+  }
+
+  async function querySource(src, query) {
+    const url = Fx.buildLocalUrl(src, query);
+    const res = await fetch(url, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const rows = await res.json();
+    const results = Fx.localResults(src, rows, query);
+    results.truncated = Array.isArray(rows) && rows.length >= Fx.LOCAL_LIMIT;
+    return results;
+  }
+
+  function saveLocalToNotes(r) {
+    const rec0 = rec("local-funds");
+    const amt = r.cents !== null ? C.formatCents(r.cents) : "amount not listed";
+    const line = `${r.place}, ${r.state}: ${r.name}, ${amt}${r.date ? ", " + fmtDate(r.date) : ""}`;
+    if (rec0.notes.includes(line)) return false;
+    rec0.notes = rec0.notes ? rec0.notes + " | " + line : line;
+    persist();
+    const notesEl = $("notes-local-funds");
+    if (notesEl) notesEl.value = rec0.notes;
+    return true;
+  }
+
+  function renderLocalGroup(src, results) {
+    const list = el("ol", { class: "wage-results" });
+    for (const r of results.slice(0, 25)) {
+      const save = el("button", { class: "btn", type: "button", text: "Save to my notes" });
+      save.addEventListener("click", () => { save.textContent = saveLocalToNotes(r) ? "Saved to local funds notes" : "Already in your notes"; save.disabled = true; });
+      const facts = [r.cents !== null ? C.formatCents(r.cents) : "Amount not published", r.date ? fmtDate(r.date) : "", r.location].filter(Boolean).join(" · ");
+      list.append(el("li", null, el("h3", { text: r.name }), el("p", { class: "amount", text: facts }),
+        el("div", { class: "actions" }, el("a", { class: "btn", href: src.claimUrl, target: "_blank", rel: "noopener noreferrer", text: "How to claim" }), save)));
+    }
+    const more = results.length > 25 ? el("p", { class: "claim", text: `Showing 25 of ${results.length}. Add a first name to narrow the list.` }) : null;
+    return el("div", { class: "local-group" },
+      el("h3", { text: `${src.place}, ${src.state}` }),
+      el("p", { class: "claim", text: `${src.what}. ${src.claim}` }),
+      list, more);
+  }
+
+  $("localForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const query = { last: $("localLast").value, first: $("localFirst").value };
+    const cov = $("localCoverage");
+    const out = $("localResults");
+    cov.replaceChildren();
+    out.replaceChildren();
+    if (!Fx.buildLocalUrl(Fx.LOCAL_SOURCES[0], query)) { localStatus("Enter at least two letters of a last name or business name.", true); return; }
+    localStatus(`Searching ${Fx.LOCAL_SOURCES.length} lists…`);
+    $("localGo").disabled = true;
+    const settled = await Promise.allSettled(Fx.LOCAL_SOURCES.map((s) => querySource(s, query)));
+    $("localGo").disabled = false;
+    let hits = 0, failed = 0, people = 0, truncated = 0;
+    settled.forEach((res, i) => {
+      const src = Fx.LOCAL_SOURCES[i];
+      const label = `${src.place}, ${src.state}`;
+      if (res.status === "rejected") {
+        failed++;
+        cov.append(el("li", { class: "fail", text: `${label}: couldn't search` }));
+        return;
+      }
+      const n = res.value.length;
+      if (res.value.truncated) truncated++;
+      const cut = res.value.truncated ? " (list too long to finish; add a first name)" : "";
+      cov.append(el("li", { class: n ? "hit" : (cut ? "fail" : null), text: `${label}: ${n ? n + " possible match" + (n === 1 ? "" : "es") : "no match"}${cut}` }));
+      if (n) { hits++; people += n; out.append(renderLocalGroup(src, res.value)); }
+    });
+    const searched = settled.length - failed;
+    const cutNote = truncated ? ` ${truncated} list${truncated === 1 ? " had" : "s had"} too many similar names to check fully; add a first name to search ${truncated === 1 ? "it" : "them"} completely.` : "";
+    if (people) localStatus(`${people} possible match${people === 1 ? "" : "es"} in ${hits} list${hits === 1 ? "" : "s"}. A matching name isn't proof it's yours; each government verifies identity before paying.${cutNote}`);
+    else if (truncated) localStatus(`No match found yet.${cutNote}`, true);
+    else if (searched) localStatus(`No match in the ${searched} list${searched === 1 ? "" : "s"} that could be searched.${failed ? " Some couldn't be reached, so try again later." : ""} These lists cover only these places; for anywhere else, use your state's unclaimed property search.`);
+    else localStatus("None of the lists could be reached right now. That isn't the same as finding nothing; try again later.", true);
+  });
+
   updateTotals();
   applyView();
   initWages();
