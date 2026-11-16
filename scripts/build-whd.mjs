@@ -27,7 +27,8 @@ const fromFile = arg("--from-file");
 async function fetchPage(key, offset, withFields) {
   const p = new URLSearchParams({ "X-API-KEY": key, limit: String(PAGE), offset: String(offset) });
   if (withFields) p.set("fields", Object.values(L.WHD_SOURCE_FIELDS).map((n) => n[0]).join(","));
-  for (let attempt = 1; attempt <= 4; attempt++) {
+  const MAX_ATTEMPTS = 8;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const res = await fetch(`${API}?${p}`, { headers: { "X-API-KEY": key, accept: "application/json" } });
     if (res.status === 401 || res.status === 403) throw new Error(`DOL API refused the key (HTTP ${res.status}). Check the DOL_API_KEY secret.`);
     if (res.status === 400 && withFields) return null; // field list not accepted; caller retries without it
@@ -37,10 +38,19 @@ async function fetchPage(key, offset, withFields) {
       if (!Array.isArray(rows)) throw new Error(`Unexpected DOL API response shape: ${JSON.stringify(body).slice(0, 200)}`);
       return rows;
     }
-    if (attempt === 4) throw new Error(`DOL API error HTTP ${res.status} at offset ${offset}`);
-    await new Promise((r) => setTimeout(r, 2000 * attempt));
+    if (attempt === MAX_ATTEMPTS) throw new Error(`DOL API error HTTP ${res.status} at offset ${offset} after ${MAX_ATTEMPTS} attempts`);
+    // Rate limited or a transient error: honor Retry-After, else back off 30s, 60s, 120s... (capped at 5 min).
+    const retryAfter = Number(res.headers.get("retry-after"));
+    const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+      ? Math.min(retryAfter, 600) * 1000
+      : Math.min(30000 * 2 ** (attempt - 1), 300000);
+    console.log(`HTTP ${res.status} at offset ${offset}; waiting ${Math.round(waitMs / 1000)}s (attempt ${attempt}/${MAX_ATTEMPTS})`);
+    await sleep(waitMs);
   }
 }
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const PAUSE_BETWEEN_PAGES_MS = 6000; // stay under DOL's per-minute limit
 
 async function fetchAll(key) {
   let withFields = true;
@@ -50,8 +60,9 @@ async function fetchAll(key) {
     if (rows === null) { withFields = false; rows = await fetchPage(key, all.length, false); }
     if (page === 0) L.checkWhdFields(rows);
     all.push(...rows);
-    process.stdout.write(`fetched ${all.length}\r`);
+    console.log(`fetched ${all.length}`);
     if (rows.length < PAGE) break;
+    await sleep(PAUSE_BETWEEN_PAGES_MS);
   }
   console.log(`fetched ${all.length} records`);
   return all;
