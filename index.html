@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="A free tool to find money legitimately owed to you: unclaimed property, tax refunds, benefits, pensions and more. Official sources only.">
+  <style>
+    :root { color-scheme: light; padding: env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px); }
+    html, body { margin: 0; }
+    img { max-width: 100%; }
+    [hidden] { display: none !important; }
+  </style>
+<title>Found Money</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: a profile filter and progress rail above a scannable column of source cards grouped by category */
+  :root {
+    --bg: #f4f6f5;
+    --surface: #ffffff;
+    --ink: #10231c;
+    --ink-soft: #46574f;
+    --line: #dde4e0;
+    --accent: #0f7a5a;        /* vault green */
+    --accent-soft: #e4f2ec;
+    --gold: #a9791c;          /* claimable money / for-you */
+    --gold-soft: #f6ecd4;
+    --warn: #9a3b2f;
+    --warn-soft: #f6e4e0;
+    --shadow: 0 1px 2px rgba(16,35,28,.06), 0 8px 24px rgba(16,35,28,.05);
+    --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c1511; --surface: #121e18; --ink: #e8f0ec; --ink-soft: #9db0a7; --line: #22332b;
+      --accent: #39c08d; --accent-soft: #15271f; --gold: #d9ac54; --gold-soft: #2a2213;
+      --warn: #e38374; --warn-soft: #2c1a16;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c1511; --surface: #121e18; --ink: #e8f0ec; --ink-soft: #9db0a7; --line: #22332b;
+    --accent: #39c08d; --accent-soft: #15271f; --gold: #d9ac54; --gold-soft: #2a2213;
+    --warn: #e38374; --warn-soft: #2c1a16;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-body); line-height: 1.5; margin: 0; }
+  .wrap {
+    max-width: 840px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 64px;
+  }
+
+  header.hero { padding-block: 38px 16px; }
+  .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin: 0 0 10px; }
+  h1 { font-family: var(--font-display); font-size: clamp(30px, 6vw, 46px); line-height: 1.05; margin: 0 0 14px; letter-spacing: -.02em; text-wrap: balance; }
+  .lede { font-size: 17px; color: var(--ink-soft); margin: 0; max-width: 62ch; }
+
+  /* profile picker */
+  .profile { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-block: 22px; box-shadow: var(--shadow); }
+  .profile h2 { font-family: var(--font-display); font-size: 17px; margin: 0 0 4px; }
+  .profile .hint { margin: 0 0 14px; font-size: 13px; color: var(--ink-soft); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font: inherit; font-size: 13px; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; transition: background .12s, border-color .12s, color .12s; }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .profile-foot { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 13px; color: var(--ink-soft); }
+  .toggle-only { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+  .toggle-only input { width: 16px; height: 16px; accent-color: var(--accent); }
+  .toggle-only.disabled { opacity: .45; cursor: not-allowed; }
+  #matchinfo { font-weight: 600; color: var(--gold); }
+  .clearprofile { font: inherit; font-size: 13px; color: var(--ink-soft); background: none; border: none; text-decoration: underline; cursor: pointer; padding: 0; }
+
+  /* progress rail */
+  .rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); padding-block: 12px; margin-block: 8px; border-bottom: 1px solid var(--line); }
+  .rail-inner { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .bar { flex: 1; min-width: 120px; height: 10px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; width: 0%; background: var(--accent); border-radius: 999px; transition: width .35s ease; }
+  .count { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .found { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .reset { font: inherit; font-size: 13px; color: var(--ink-soft); background: none; border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; cursor: pointer; }
+  .reset:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+  .note { display: flex; gap: 12px; align-items: flex-start; background: var(--gold-soft); border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent); border-radius: 14px; padding: 14px 16px; margin-block: 20px; }
+  .note svg { flex: none; margin-top: 2px; }
+  .note p { margin: 0; font-size: 14px; color: var(--ink); }
+  .note strong { color: var(--gold); }
+
+  section.cat { margin-block: 30px 0; }
+  section.cat.hide { display: none; }
+  .cat-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+  .cat-head h2 { font-family: var(--font-display); font-size: 20px; margin: 0; letter-spacing: -.01em; }
+  .cat-head .tag { font-size: 12px; color: var(--ink-soft); }
+  .cat-desc { margin: 0 0 14px; font-size: 14px; color: var(--ink-soft); max-width: 64ch; }
+
+  .cards { display: grid; gap: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; }
+  .card.hide { display: none; }
+  .card.match { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent), var(--shadow); }
+  .card.searched { opacity: .72; }
+  .card.searched .src-name { text-decoration: line-through; text-decoration-color: var(--ink-soft); }
+
+  .check { appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 2px 0 0; flex: none; border: 2px solid var(--line); border-radius: 7px; background: var(--surface); cursor: pointer; position: relative; transition: border-color .15s, background .15s; }
+  .check:hover { border-color: var(--accent); }
+  .check:checked { background: var(--accent); border-color: var(--accent); }
+  .check:checked::after { content: ""; position: absolute; left: 7px; top: 3px; width: 6px; height: 11px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+  .check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .body .src-name { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+  .body .src-what { margin: 0 0 10px; font-size: 14px; color: var(--ink-soft); }
+  .src-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent-soft); padding: 6px 11px; border-radius: 9px; }
+  .src-link:hover { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); }
+  .src-host { display: block; font-size: 12px; color: var(--ink-soft); margin-top: 8px; word-break: break-word; }
+  .free { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 2px 7px; border-radius: 6px; margin-left: 8px; vertical-align: middle; }
+  .foryou { display: none; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--gold); background: var(--gold-soft); padding: 2px 7px; border-radius: 6px; margin-left: 8px; vertical-align: middle; }
+  .card.match .foryou { display: inline-block; }
+
+  /* tracker row */
+  .track { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field.notes { flex: 1; min-width: 150px; }
+  .tlab { font-size: 11px; letter-spacing: .03em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+  .track select, .track input { font: inherit; font-size: 13px; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  .track input.amt { width: 110px; font-variant-numeric: tabular-nums; }
+  .track input.notes-in { width: 100%; }
+  .track select:focus-visible, .track input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .st-claiming { border-color: var(--gold) !important; }
+  .st-claimed { border-color: var(--accent) !important; }
+
+  /* public-facing additions */
+  .trust { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+  .trust span { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+  .trust svg { color: var(--accent); flex: none; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-block: 24px 4px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .step .n { margin: 0; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--accent); }
+  .step h3 { font-family: var(--font-display); font-size: 15px; margin: 5px 0 5px; }
+  .step p { margin: 0; font-size: 13px; color: var(--ink-soft); }
+  @media (max-width: 560px) { .steps { grid-template-columns: 1fr; } }
+  .faq { margin-top: 34px; display: grid; gap: 10px; }
+  .faq h2 { font-family: var(--font-display); font-size: 20px; margin: 0 0 4px; letter-spacing: -.01em; }
+  .faq details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 16px; }
+  .faq summary { cursor: pointer; font-weight: 600; padding: 14px 0; font-size: 14px; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; color: var(--accent); font-size: 20px; font-weight: 700; line-height: 1; }
+  .faq details[open] summary::after { content: "\2212"; }
+  .faq details p { margin: 0 0 14px; font-size: 14px; color: var(--ink-soft); }
+
+  footer { margin-top: 46px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-soft); }
+  footer p { margin: 0 0 8px; }
+
+  @media (max-width: 440px) { .card { padding: 14px; gap: 11px; } }
+</style>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Money that's already yours</p>
+    <h1>Found Money</h1>
+    <p class="lede">A free worklist for tracking down funds that are legitimately owed to you &mdash; forgotten accounts, refunds, uncashed checks, lost benefits, and programs you qualify for but never claimed. Every source below is an official government or institutional database. Tell it what describes you, work the sources it flags, and track what you find.</p>
+    <div class="trust">
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>100% free, no ads</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Official government sources only</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Your info never leaves your device</span>
+    </div>
+  </header>
+
+  <div class="steps">
+    <div class="step"><p class="n">STEP 1</p><h3>Say who you are</h3><p>Tap the tags that describe you. The list flags the sources most likely to hold money for you.</p></div>
+    <div class="step"><p class="n">STEP 2</p><h3>Search the sources</h3><p>Open each official site and search your name &mdash; plus former names, and relatives whose heir you are.</p></div>
+    <div class="step"><p class="n">STEP 3</p><h3>Track &amp; claim free</h3><p>Log what you find, then claim it on the official site. You never pay to claim your own money.</p></div>
+  </div>
+
+  <div class="profile">
+    <h2>Which of these describe you?</h2>
+    <p class="hint">Optional. Tap any that apply &mdash; it flags the sources worth your time first. Saved only in this browser.</p>
+    <div class="chips" id="chips"></div>
+    <div class="profile-foot">
+      <label class="toggle-only disabled" id="onlyLbl"><input type="checkbox" id="only" disabled> Show only my matches</label>
+      <span id="matchinfo"></span>
+      <button class="clearprofile" id="clearProfile" type="button" hidden>Clear selections</button>
+    </div>
+  </div>
+
+  <div class="rail">
+    <div class="rail-inner">
+      <span class="count" id="count">0 of 0 searched</span>
+      <div class="bar"><span id="fill"></span></div>
+      <span class="found" id="foundTotal">$0 found</span>
+      <button class="reset" id="reset" type="button">Reset</button>
+    </div>
+  </div>
+
+  <div class="note">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <p><strong>You should never pay to claim your own money.</strong> Searching and claiming through the official sources below is free. Ignore any "finder," "asset recovery," or "surplus recovery" company that offers to get your money for a cut &mdash; by law their fee is capped in most states, and you can do the exact same claim yourself for nothing.</p>
+  </div>
+
+  <main id="list"></main>
+
+  <section class="faq">
+    <h2>Questions people ask</h2>
+    <details><summary>Is this really free?</summary><p>Yes. Every site linked here is an official government or institutional database, and searching and claiming are always free. This tool is free too, and shows no ads.</p></details>
+    <details><summary>Is it a scam? How do I know it's safe?</summary><p>This tool never asks for your Social Security number, bank details, or payment, and it never sees what you type &mdash; your profile and tracking live only in your own browser. The real scams are "finder" or "recovery" companies that take a cut to claim money you can claim yourself for free. Ignore them.</p></details>
+    <details><summary>Will I actually find money?</summary><p>Maybe. About 1 in 7 people have unclaimed property, usually a small-to-moderate amount. For many people the bigger money is in benefits and tax credits they qualify for but never claimed. There's no guarantee &mdash; but checking costs nothing but time.</p></details>
+    <details><summary>Can I claim money under someone else's name?</summary><p>Only if it's genuinely yours, or you're the rightful heir of a relative who has passed away. A matching name alone isn't enough &mdash; the state verifies your identity and address history. Claiming a stranger's money because the name matches is fraud.</p></details>
+    <details><summary>Why do some sites ask me to "verify you are human"?</summary><p>Official databases use anti-bot checks. Just complete the checkbox when it appears &mdash; it's normal and safe.</p></details>
+  </section>
+
+  <footer>
+    <p><strong>How to use this:</strong> Search each source using your name (and any former names), plus the names of anyone whose estate you'd inherit from. Try every state you've lived or worked in. Mark what you searched, log any amount you find, and keep records of what you claim.</p>
+    <p>Your profile and tracking are saved in this browser only &mdash; they never leave your device. Sources are the official U.S. databases as of 2026; a few are state-by-state or questionnaire-based, so follow the directory and finder links where noted.</p>
+  </footer>
+</div>
+
+<script>
+  const PROFILE = [
+    { id: "student",    label: "Student / paying for school" },
+    { id: "loans",      label: "Have student loans" },
+    { id: "worked",     label: "Worked a W-2 job" },
+    { id: "retirement", label: "Had a 401(k) or pension" },
+    { id: "fedrr",      label: "Federal or railroad worker" },
+    { id: "veteran",    label: "Veteran / military family" },
+    { id: "homeowner",  label: "Own a home" },
+    { id: "fha",        label: "Had an FHA mortgage" },
+    { id: "renter",     label: "Rent my home" },
+    { id: "parent",     label: "Have kids" },
+    { id: "senior",     label: "65 or older" },
+    { id: "lowincome",  label: "Low-to-moderate income" },
+    { id: "investor",   label: "Had investments / brokerage" },
+    { id: "disaster",   label: "Hit by a declared disaster" },
+  ];
+
+  const DATA = [
+    { cat: "Government-wide starting points", tag: "search these first",
+      desc: "Two official federal hubs that point you across many programs at once. The fastest way to see which of the sources below are worth your time.",
+      sources: [
+        { name: "USA.gov — Find unclaimed money", what: "The government's own master page: unclaimed property, back wages, tax refunds, pensions, bank failures, FHA refunds and more, all in one place.", url: "https://www.usa.gov/unclaimed-money", host: "usa.gov/unclaimed-money" },
+        { name: "USA.gov Benefit Finder", what: "Answer a few questions and it lists federal and state benefits you may be eligible for but aren't receiving.", url: "https://www.usa.gov/benefit-finder", host: "usa.gov/benefit-finder" },
+      ] },
+    { cat: "State unclaimed property", tag: "the big one",
+      desc: "When a bank account, paycheck, security deposit, insurance payout, or refund goes untouched, the holder must turn it over to the state. States hold tens of billions. This is where most people find money.",
+      sources: [
+        { name: "MissingMoney.com", what: "The official NAUPA database searching most states at once. Start here, then confirm claims on each state's own site.", url: "https://www.missingmoney.com", host: "missingmoney.com" },
+        { name: "Your state treasury's unclaimed property site", what: "Search every state you've lived or worked in — some aren't fully in MissingMoney. This directory links to all of them.", url: "https://unclaimed.org/", host: "unclaimed.org (all states)" },
+      ] },
+    { cat: "Tax refunds & credits", tag: "IRS + states",
+      desc: "Refund checks that bounced back undeliverable, refunds for returns never filed (three years to claim), and credits worth real money that people routinely miss.",
+      sources: [
+        { name: "IRS — unclaimed refunds", what: "Check if the IRS is holding a refund for you, or if you left money behind by not filing a past return.", url: "https://www.irs.gov/refunds", host: "irs.gov/refunds" },
+        { name: "IRS — Earned Income Tax Credit", what: "One of the most-missed credits — up to several thousand dollars for low-to-moderate income workers. Claimable for up to three prior years.", url: "https://www.irs.gov/credits-deductions/individuals/earned-income-tax-credit-eitc", host: "irs.gov (EITC)", rel: ["lowincome","worked"] },
+        { name: "IRS — Child Tax Credit", what: "Refundable credit worth up to a few thousand dollars per child. Non-filers routinely miss it — you can still claim prior years by filing.", url: "https://www.irs.gov/credits-deductions/individuals/child-tax-credit", host: "irs.gov (Child Tax Credit)", rel: ["parent"] },
+        { name: "IRS — your online account", what: "See balances, past payments, credits and any refund the IRS has on record for you.", url: "https://www.irs.gov/payments/online-account-for-individuals", host: "irs.gov/payments" },
+        { name: "State income tax refunds", what: "Most state revenue departments have their own refund / unclaimed-refund lookup. Check every state where you filed.", url: "https://www.taxadmin.org/state-tax-agencies", host: "taxadmin.org (state agencies)" },
+      ] },
+    { cat: "Benefits you may qualify for", tag: "not claimed = left on the table",
+      desc: "Not 'lost' money, but money you're entitled to and aren't collecting. Billions go unclaimed every year because people don't know they're eligible.",
+      sources: [
+        { name: "Benefits.gov / Benefit Finder", what: "A guided questionnaire across 1,000+ federal and state programs: income support, healthcare, housing, food, disaster aid and more.", url: "https://www.benefits.gov", host: "benefits.gov" },
+        { name: "Medicare — Extra Help with drug costs", what: "If you're on Medicare, this and related cost-assistance can save thousands a year on prescriptions. Many eligible people never enroll.", url: "https://www.medicare.gov/basics/costs/help/drug-costs", host: "medicare.gov", rel: ["senior"] },
+      ] },
+    { cat: "Education & student aid", tag: "grants don't get repaid",
+      desc: "Federal grants are free money for school — you never pay them back. Plus loan forgiveness and discharge programs that can wipe out balances you're still carrying.",
+      sources: [
+        { name: "Federal Student Aid (FAFSA)", what: "The one form that unlocks Pell Grants, work-study and state aid. File it even if you think you won't qualify.", url: "https://studentaid.gov", host: "studentaid.gov", rel: ["student"] },
+        { name: "Federal grants (Pell & more)", what: "Grants for undergrads, teachers and specific fields that don't have to be repaid.", url: "https://studentaid.gov/understand-aid/types/grants", host: "studentaid.gov (grants)", rel: ["student"] },
+        { name: "Student loan forgiveness & discharge", what: "Public Service Loan Forgiveness, borrower defense, closed-school and disability discharge — and refunds of payments in some cases.", url: "https://studentaid.gov/manage-loans/forgiveness-cancellation", host: "studentaid.gov (forgiveness)", rel: ["loans"] },
+        { name: "Scholarships & aid directory", what: "The government's guide to finding scholarships and grants. Never pay a service to 'find' scholarships — that's a scam.", url: "https://www.usa.gov/financial-aid", host: "usa.gov/financial-aid", rel: ["student"] },
+      ] },
+    { cat: "Help with bills", tag: "ongoing, not one-time",
+      desc: "Programs that cut your utility, phone and internet costs — money off every bill, not a one-time check. Income limits apply but are more generous than most people assume.",
+      sources: [
+        { name: "LIHEAP — energy bill assistance", what: "Federal help paying heating and cooling bills, plus some crisis and weatherization aid. Run through your state or tribe.", url: "https://www.acf.hhs.gov/ocs/programs/liheap", host: "acf.hhs.gov (LIHEAP)", rel: ["lowincome"] },
+        { name: "Weatherization Assistance Program", what: "Free home energy upgrades (insulation, sealing, repairs) that lower bills for income-eligible households.", url: "https://www.energy.gov/scep/wap/weatherization-assistance-program", host: "energy.gov (weatherization)", rel: ["lowincome","homeowner"] },
+        { name: "Lifeline — phone & internet discount", what: "A monthly discount on phone or broadband for eligible low-income households.", url: "https://www.fcc.gov/lifeline", host: "fcc.gov/lifeline", rel: ["lowincome"] },
+        { name: "Utility & water bill help", what: "The USA.gov hub for utility and water assistance programs, including what replaced older water-bill aid.", url: "https://www.usa.gov/help-with-utility-bills", host: "usa.gov/help-with-utility-bills", rel: ["lowincome"] },
+      ] },
+    { cat: "Healthcare savings", tag: "subsidies & coverage",
+      desc: "Premium subsidies and free or low-cost coverage many people are eligible for and never sign up for. Worth thousands a year.",
+      sources: [
+        { name: "HealthCare.gov — premium subsidies", what: "ACA marketplace plans come with income-based premium tax credits that can cut your cost to very little. Check even if you've looked before.", url: "https://www.healthcare.gov", host: "healthcare.gov", rel: ["lowincome"] },
+        { name: "Medicaid & CHIP", what: "Free or very low-cost health coverage for eligible adults and children. Eligibility is broader than most people think.", url: "https://www.medicaid.gov", host: "medicaid.gov", rel: ["lowincome","parent"] },
+      ] },
+    { cat: "Social Security & SSI", tag: "benefits you've earned",
+      desc: "Retirement, disability, survivor and supplemental benefits people are owed but don't claim — including survivor benefits for widows, widowers and children.",
+      sources: [
+        { name: "Social Security benefits", what: "Check what you're eligible for — retirement, disability, and survivor benefits a family member's record may entitle you to.", url: "https://www.ssa.gov/benefits", host: "ssa.gov/benefits", rel: ["senior"] },
+        { name: "Supplemental Security Income (SSI)", what: "Monthly payments for people with limited income who are 65+, blind or disabled. Separate from regular Social Security.", url: "https://www.ssa.gov/ssi", host: "ssa.gov/ssi", rel: ["lowincome","senior"] },
+      ] },
+    { cat: "Food & family", tag: "monthly support",
+      desc: "Nutrition and child-care programs that free up real money in your budget every month.",
+      sources: [
+        { name: "SNAP (food assistance)", what: "Monthly grocery benefits for eligible households. Millions who qualify don't apply.", url: "https://www.fns.usda.gov/snap/supplemental-nutrition-assistance-program", host: "fns.usda.gov/snap", rel: ["lowincome"] },
+        { name: "WIC — women, infants & children", what: "Food, formula, and nutrition support for pregnant people and young children.", url: "https://www.fns.usda.gov/wic", host: "fns.usda.gov/wic", rel: ["parent","lowincome"] },
+        { name: "Child care financial assistance", what: "Help paying for child care so you can work or study. Run through your state.", url: "https://childcare.gov", host: "childcare.gov", rel: ["parent"] },
+      ] },
+    { cat: "Retirement & pensions", tag: "old jobs count",
+      desc: "Old 401(k)s you rolled past, pensions from employers that shut down or were taken over, and federal or railroad retirement benefits you may have earned and forgotten.",
+      sources: [
+        { name: "National Registry of Unclaimed Retirement Benefits", what: "Free search for retirement money left behind at former employers.", url: "https://www.unclaimedretirementbenefits.com", host: "unclaimedretirementbenefits.com", rel: ["retirement","worked"] },
+        { name: "PBGC — unclaimed pensions", what: "The federal agency that takes over failed pension plans holds unclaimed benefits for hundreds of thousands of people.", url: "https://www.pbgc.gov/search-unclaimed-pensions", host: "pbgc.gov", rel: ["retirement"] },
+        { name: "DOL — abandoned plan database", what: "Find out who's now administering a retirement plan from an employer that disappeared.", url: "https://www.askebsa.dol.gov/AbandonedPlanSearch", host: "askebsa.dol.gov", rel: ["retirement"] },
+        { name: "OPM — federal retirement", what: "For anyone who worked for the federal government: civil-service retirement and survivor benefits you may be owed.", url: "https://www.opm.gov/retirement-center/", host: "opm.gov/retirement-center", rel: ["fedrr"] },
+        { name: "Railroad Retirement Board", what: "Railroad workers and their families have a separate retirement and survivor system — benefits here aren't paid by Social Security.", url: "https://www.rrb.gov", host: "rrb.gov", rel: ["fedrr"] },
+      ] },
+    { cat: "Unpaid wages", tag: "owed by an employer",
+      desc: "Back wages the Department of Labor recovered from employers that broke labor law, waiting to be collected by the workers they're owed to.",
+      sources: [
+        { name: "DOL — Workers Owed Wages (WOW)", what: "Search by your name or a former employer to see if back wages are being held for you. Three-year window to claim.", url: "https://www.dol.gov/agencies/whd/wow", host: "dol.gov/agencies/whd/wow", rel: ["worked"] },
+      ] },
+    { cat: "Court & agency restitution", tag: "harmed-consumer funds",
+      desc: "When regulators and courts penalize a company, the money often goes back to the people it harmed. If you dealt with a company that was sued or fined, you may have a check waiting.",
+      sources: [
+        { name: "U.S. Courts — unclaimed funds", what: "Money left behind in federal court cases, including bankruptcies, held until the rightful owner claims it.", url: "https://www.ucf.uscourts.gov", host: "ucf.uscourts.gov" },
+        { name: "CFPB — payments to harmed consumers", what: "The consumer bureau's victim-relief fund repays people harmed by financial-company misconduct.", url: "https://www.consumerfinance.gov/enforcement/payments-harmed-consumers/", host: "consumerfinance.gov" },
+        { name: "SEC — distributions to harmed investors", what: "If you lost money to securities fraud the SEC prosecuted, a distribution fund may owe you.", url: "https://www.sec.gov/enforcement-litigation/distributions-harmed-investors", host: "sec.gov", rel: ["investor"] },
+      ] },
+    { cat: "Banks & credit unions", tag: "failed institutions",
+      desc: "Deposits and funds left behind when a bank or credit union failed and was closed by regulators.",
+      sources: [
+        { name: "FDIC — unclaimed funds", what: "Money owed to depositors and others from failed banks the FDIC closed.", url: "https://closedbanks.fdic.gov/funds/", host: "closedbanks.fdic.gov/funds" },
+        { name: "NCUA — unclaimed deposits", what: "The credit-union equivalent: deposits from liquidated federal credit unions.", url: "https://www.ncua.gov/support-services/conservatorships-liquidations/unclaimed-deposits", host: "ncua.gov" },
+      ] },
+    { cat: "Savings bonds & Treasury", tag: "matured & forgotten",
+      desc: "U.S. savings bonds that stopped earning interest and were never cashed. Billions sit matured and unredeemed.",
+      sources: [
+        { name: "TreasuryDirect — Treasury Hunt", what: "Search for matured savings bonds and other Treasury securities tied to your name or Social Security number.", url: "https://www.treasurydirect.gov/savings-bonds/treasury-hunt/", host: "treasurydirect.gov/treasury-hunt" },
+      ] },
+    { cat: "Life insurance", tag: "unclaimed policies",
+      desc: "Benefits from a policy a relative took out that the family never knew about or couldn't locate.",
+      sources: [
+        { name: "NAIC — Life Insurance Policy Locator", what: "Regulators ask participating insurers to search their records for policies or annuities naming you as owner or beneficiary.", url: "https://eapps.naic.org/life-policy-locator/", host: "eapps.naic.org/life-policy-locator" },
+      ] },
+    { cat: "Veterans & military", tag: "service benefits",
+      desc: "If you or a family member served, there are dedicated funds and benefits that often go unclaimed — insurance dividends, retired-pay records, and the full range of VA benefits.",
+      sources: [
+        { name: "VA — unclaimed insurance funds", what: "The VA holds unclaimed insurance payouts and dividends owed to veterans and their beneficiaries.", url: "https://www.benefits.va.gov/insurance/unclaimed_funds.asp", host: "benefits.va.gov", rel: ["veteran"] },
+        { name: "DFAS — retired & former military pay", what: "Check retired-pay accounts and records; former service members are sometimes owed money they never collected.", url: "https://www.dfas.mil/RetiredMilitary/", host: "dfas.mil", rel: ["veteran"] },
+        { name: "VA — full benefits overview", what: "Disability compensation, pension, education, home loans and more — much of it unclaimed by those eligible.", url: "https://www.benefits.va.gov/benefits/", host: "benefits.va.gov/benefits", rel: ["veteran"] },
+      ] },
+    { cat: "Mortgage & housing", tag: "FHA refunds",
+      desc: "If you had an FHA-insured mortgage and paid it off or refinanced, you may be owed a mortgage-insurance-premium refund or distributive share.",
+      sources: [
+        { name: "FHA mortgage-insurance refunds", what: "The USA.gov hub explains who qualifies and links to HUD's lookup. Free — HUD never charges to issue a refund, so ignore any company that offers to get it for a fee.", url: "https://www.usa.gov/unclaimed-money", host: "usa.gov (see 'FHA refunds')", rel: ["fha","homeowner"] },
+      ] },
+    { cat: "Rebates & everyday money back", tag: "small but real",
+      desc: "Money you can still claim from purchases and bills: energy rebates and tax credits, and forgotten gift-card balances.",
+      sources: [
+        { name: "ENERGY STAR — rebate finder", what: "Enter your ZIP to find rebates from utilities and manufacturers on appliances, HVAC and home upgrades you may already have bought.", url: "https://www.energystar.gov/rebate-finder", host: "energystar.gov/rebate-finder", rel: ["homeowner"] },
+        { name: "Energy.gov — tax credits & savings", what: "Federal home-energy tax credits (insulation, heat pumps, solar, windows) that cut what you owe — many homeowners qualify and don't claim them.", url: "https://www.energy.gov/save", host: "energy.gov/save", rel: ["homeowner"] },
+        { name: "Check old gift-card balances", what: "Unused gift cards are real stored money. Most issuers have a free balance lookup — search the brand's name plus 'check balance' and use the card's own site.", url: "https://www.usa.gov/gift-cards", host: "usa.gov/gift-cards" },
+      ] },
+    { cat: "Housing & home repair", tag: "rent + repairs",
+      desc: "Rental assistance and home-repair grants that reduce what you pay to keep a roof over your head.",
+      sources: [
+        { name: "HUD — rental assistance", what: "Housing choice vouchers and subsidized housing that cap your rent at a share of income.", url: "https://www.hud.gov/topics/rental_assistance", host: "hud.gov (rental assistance)", rel: ["renter","lowincome"] },
+        { name: "USDA — home repair loans & grants", what: "Grants (not just loans) for very-low-income rural homeowners, especially seniors, to repair and modernize a home.", url: "https://www.rd.usda.gov/programs-services/single-family-housing-programs/single-family-housing-repair-loans-grants", host: "rd.usda.gov", rel: ["homeowner","lowincome","senior"] },
+      ] },
+    { cat: "Disaster & emergency aid", tag: "if you've been affected",
+      desc: "If a declared disaster hit where you live, federal grants can cover losses insurance didn't — and these are grants, not loans.",
+      sources: [
+        { name: "DisasterAssistance.gov", what: "One application for FEMA and other federal disaster help: housing, repairs, and other needs after a declared disaster.", url: "https://www.disasterassistance.gov", host: "disasterassistance.gov", rel: ["disaster"] },
+      ] },
+    { cat: "Local & county funds", tag: "easy to overlook",
+      desc: "Beyond the state level, your county and city often hold their own unclaimed money — property-tax overpayments, foreclosure surplus, utility deposits, bail refunds, court funds. These aren't in the national databases.",
+      sources: [
+        { name: "Search your county & city", what: "Use the state directory, then separately search your county treasurer and municipal/clerk-of-court sites for 'unclaimed funds' or 'tax overage/surplus'. Free to claim — ignore 'surplus recovery' agents who want a cut.", url: "https://unclaimed.org/", host: "unclaimed.org, then your county/city site" },
+      ] },
+    { cat: "Class-action settlements", tag: "check carefully",
+      desc: "If a company you did business with was sued and settled, you may be a class member owed a payout — but only file through the settlement's own official site. Be alert for scams that mimic these.",
+      sources: [
+        { name: "Open class-action settlements", what: "A roundup of settlements currently accepting claims. Always file on the official administrator's site the listing links to, never a third party.", url: "https://www.classaction.org/settlements", host: "classaction.org/settlements" },
+      ] },
+    { cat: "Emergency & community assistance", tag: "given, not owed",
+      desc: "Money and help that charities, nonprofits, and local programs give to people in need — rent and utility help, emergency cash, food. You don't have to have paid in; you just have to qualify.",
+      sources: [
+        { name: "Call or search 211", what: "United Way's 211 connects you to local help: rent, utilities, food, emergency cash funds, and more, matched to your area. Free, 24/7 — dial 211 or search online.", url: "https://www.211.org", host: "211.org", rel: ["lowincome"] },
+        { name: "findhelp.org (free local programs)", what: "Enter your ZIP to find free and reduced-cost programs near you — financial assistance, food, housing, health, and more.", url: "https://www.findhelp.org", host: "findhelp.org", rel: ["lowincome"] },
+        { name: "Government grants — the real story", what: "Grants.gov lists federal grants, but be clear-eyed: almost all go to organizations, not individuals, and there is no general 'free government money for personal bills'. Anyone promising that is running a scam.", url: "https://www.grants.gov", host: "grants.gov" },
+      ] },
+    { cat: "Earn-it offers (legit free money)", tag: "real — but you do something",
+      desc: "Genuine money that companies hand out as incentives. It's real and not a scam, but you earn it: you open an account, take part in a study, or shop through a portal. Treat these as side income, not found money.",
+      sources: [
+        { name: "Bank & brokerage sign-up bonuses", what: "Banks pay $100–$400+ to open an account and meet simple terms. This tracker lists current, legitimate offers. Read the fine print (direct deposit, minimum balance, fees).", url: "https://www.doctorofcredit.com/best-bank-account-bonuses/", host: "doctorofcredit.com" },
+        { name: "Paid research studies (UserInterviews)", what: "Companies pay $50–$200+ for an hour of feedback on products and apps. Sign-up is free; never pay to join a 'study'.", url: "https://www.userinterviews.com", host: "userinterviews.com" },
+        { name: "Paid research studies (Respondent)", what: "Similar paid-research marketplace, often higher-paying professional studies.", url: "https://www.respondent.io", host: "respondent.io" },
+        { name: "Paid clinical & health studies", what: "ClinicalTrials.gov and ResearchMatch list studies that often compensate participants. Compensation and risks vary — read the consent form.", url: "https://clinicaltrials.gov", host: "clinicaltrials.gov" },
+        { name: "Cashback on shopping you'd do anyway", what: "Portals like Rakuten pay a percentage back on purchases you were already making. Modest, but real, and free to use.", url: "https://www.rakuten.com", host: "rakuten.com" },
+      ] },
+    { cat: "Crowdfunding & guaranteed income", tag: "ask, or apply",
+      desc: "Two more legitimate paths: raising money from people who choose to give, and the growing set of local guaranteed-income pilots that send recurring cash to selected residents.",
+      sources: [
+        { name: "GoFundMe (crowdfunding)", what: "If you're facing a real hardship, a well-told campaign shared with your network can raise meaningful money. Free to start; be honest and specific.", url: "https://www.gofundme.com", host: "gofundme.com" },
+        { name: "Guaranteed-income pilots", what: "Dozens of cities run programs that send no-strings monthly cash to selected low-income residents. This tracks where they exist and who's eligible.", url: "https://www.mayorsforagi.org", host: "mayorsforagi.org", rel: ["lowincome"] },
+      ] },
+  ];
+
+  const K_TRACK = "found-money-track-v2";
+  const K_PROFILE = "found-money-profile-v1";
+  let track = {};    // id -> { searched:bool, status:str, amount:str, notes:str }
+  let profile = {};  // id -> true
+  try { track = JSON.parse(localStorage.getItem(K_TRACK) || "{}"); } catch (e) { track = {}; }
+  try { profile = JSON.parse(localStorage.getItem(K_PROFILE) || "{}"); } catch (e) { profile = {}; }
+
+  const STATUSES = [
+    { v: "todo", t: "To do" },
+    { v: "none", t: "Searched – nothing" },
+    { v: "claiming", t: "Found – claiming" },
+    { v: "claimed", t: "Claimed" },
+  ];
+
+  function rec(id) { return track[id] || (track[id] = { searched: false, status: "todo", amount: "", notes: "" }); }
+  function saveTrack() { try { localStorage.setItem(K_TRACK, JSON.stringify(track)); } catch (e) {} }
+  function saveProfile() { try { localStorage.setItem(K_PROFILE, JSON.stringify(profile)); } catch (e) {} }
+  function profileActive() { return Object.values(profile).some(Boolean); }
+  function matches(src) {
+    if (!src.rel || !src.rel.length) return false;       // "everyone" sources aren't a special match
+    return src.rel.some(f => profile[f]);
+  }
+
+  // ---- build profile chips ----
+  const chipsEl = document.getElementById("chips");
+  PROFILE.forEach(p => {
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.type = "button";
+    b.textContent = p.label;
+    b.setAttribute("aria-pressed", profile[p.id] ? "true" : "false");
+    b.addEventListener("click", () => {
+      profile[p.id] = !profile[p.id];
+      if (!profile[p.id]) delete profile[p.id];
+      b.setAttribute("aria-pressed", profile[p.id] ? "true" : "false");
+      saveProfile(); applyFilter();
+    });
+    chipsEl.appendChild(b);
+  });
+
+  // ---- build source cards ----
+  const list = document.getElementById("list");
+  const cardIndex = []; // {id, src, el}
+  let total = 0;
+  DATA.forEach((group, gi) => {
+    const sec = document.createElement("section");
+    sec.className = "cat";
+    sec.dataset.gi = gi;
+    const head = document.createElement("div");
+    head.className = "cat-head";
+    const h2 = document.createElement("h2"); h2.textContent = group.cat;
+    const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = group.tag;
+    head.append(h2, tag);
+    sec.appendChild(head);
+    const desc = document.createElement("p"); desc.className = "cat-desc"; desc.textContent = group.desc;
+    sec.appendChild(desc);
+    const cards = document.createElement("div"); cards.className = "cards";
+
+    group.sources.forEach((s, si) => {
+      total++;
+      const id = `c${gi}_${si}`;
+      const r = rec(id);
+      const card = document.createElement("div");
+      card.className = "card" + (r.searched ? " searched" : "");
+
+      const box = document.createElement("input");
+      box.type = "checkbox"; box.className = "check"; box.checked = !!r.searched;
+      box.setAttribute("aria-label", "Mark " + s.name + " as searched");
+
+      const bodyEl = document.createElement("div"); bodyEl.className = "body";
+      const nameEl = document.createElement("p"); nameEl.className = "src-name"; nameEl.textContent = s.name;
+      const freeEl = document.createElement("span"); freeEl.className = "free"; freeEl.textContent = "free"; nameEl.appendChild(freeEl);
+      const fy = document.createElement("span"); fy.className = "foryou"; fy.textContent = "For you"; nameEl.appendChild(fy);
+      const whatEl = document.createElement("p"); whatEl.className = "src-what"; whatEl.textContent = s.what;
+      const link = document.createElement("a"); link.className = "src-link"; link.href = s.url; link.target = "_blank"; link.rel = "noopener noreferrer";
+      link.innerHTML = 'Search this source <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>';
+      const hostEl = document.createElement("span"); hostEl.className = "src-host"; hostEl.textContent = s.host;
+
+      // tracker row
+      const trackRow = document.createElement("div"); trackRow.className = "track";
+      // status
+      const fStatus = document.createElement("div"); fStatus.className = "field";
+      const lStatus = document.createElement("label"); lStatus.className = "tlab"; lStatus.textContent = "Status"; lStatus.htmlFor = id + "_st";
+      const sel = document.createElement("select"); sel.id = id + "_st";
+      STATUSES.forEach(o => { const op = document.createElement("option"); op.value = o.v; op.textContent = o.t; sel.appendChild(op); });
+      sel.value = r.status || "todo";
+      fStatus.append(lStatus, sel);
+      // amount
+      const fAmt = document.createElement("div"); fAmt.className = "field";
+      const lAmt = document.createElement("label"); lAmt.className = "tlab"; lAmt.textContent = "Amount found"; lAmt.htmlFor = id + "_amt";
+      const amt = document.createElement("input"); amt.id = id + "_amt"; amt.className = "amt"; amt.inputMode = "decimal"; amt.placeholder = "$0"; amt.value = r.amount || "";
+      fAmt.append(lAmt, amt);
+      // notes
+      const fNotes = document.createElement("div"); fNotes.className = "field notes";
+      const lNotes = document.createElement("label"); lNotes.className = "tlab"; lNotes.textContent = "Notes"; lNotes.htmlFor = id + "_notes";
+      const notes = document.createElement("input"); notes.id = id + "_notes"; notes.className = "notes-in"; notes.placeholder = "claim #, date, who to call…"; notes.value = r.notes || "";
+      fNotes.append(lNotes, notes);
+      trackRow.append(fStatus, fAmt, fNotes);
+
+      function styleStatus() { sel.classList.toggle("st-claiming", sel.value === "claiming"); sel.classList.toggle("st-claimed", sel.value === "claimed"); }
+      styleStatus();
+
+      box.addEventListener("change", () => { r.searched = box.checked; card.classList.toggle("searched", box.checked); if (box.checked && r.status === "todo") { r.status = "none"; sel.value = "none"; styleStatus(); } saveTrack(); updateTotals(); });
+      sel.addEventListener("change", () => { r.status = sel.value; styleStatus(); if (sel.value !== "todo") { r.searched = true; box.checked = true; card.classList.add("searched"); } saveTrack(); updateTotals(); });
+      amt.addEventListener("input", () => { r.amount = amt.value; saveTrack(); updateTotals(); });
+      notes.addEventListener("input", () => { r.notes = notes.value; saveTrack(); });
+
+      bodyEl.append(nameEl, whatEl, link, hostEl, trackRow);
+      card.append(box, bodyEl);
+      cards.appendChild(card);
+      cardIndex.push({ id, src: s, el: card });
+    });
+
+    sec.appendChild(cards);
+    list.appendChild(sec);
+  });
+
+  // ---- totals, filter ----
+  const countEl = document.getElementById("count");
+  const fillEl = document.getElementById("fill");
+  const foundEl = document.getElementById("foundTotal");
+  function parseAmt(v) { const n = parseFloat(String(v).replace(/[^0-9.]/g, "")); return isNaN(n) ? 0 : n; }
+  function fmt(n) { return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 2 }); }
+  function updateTotals() {
+    let searched = 0, found = 0;
+    Object.values(track).forEach(r => { if (r.searched || (r.status && r.status !== "todo")) searched++; found += parseAmt(r.amount); });
+    countEl.textContent = `${searched} of ${total} searched`;
+    fillEl.style.width = (total ? (searched / total * 100) : 0) + "%";
+    foundEl.textContent = fmt(found) + " found";
+  }
+
+  const onlyEl = document.getElementById("only");
+  const onlyLbl = document.getElementById("onlyLbl");
+  const matchInfo = document.getElementById("matchinfo");
+  const clearBtn = document.getElementById("clearProfile");
+  function applyFilter() {
+    const active = profileActive();
+    onlyEl.disabled = !active;
+    onlyLbl.classList.toggle("disabled", !active);
+    clearBtn.hidden = !active;
+    if (!active) { onlyEl.checked = false; }
+    let matchCount = 0;
+    cardIndex.forEach(c => {
+      const m = active && matches(c.src);
+      c.el.classList.toggle("match", m);
+      if (m) matchCount++;
+      const hide = active && onlyEl.checked && !m && !(c.src.rel && c.src.rel.length ? false : true);
+      // show if: not filtering-only, OR it's a match, OR it's an "everyone" source (no rel)
+      const everyone = !(c.src.rel && c.src.rel.length);
+      c.el.classList.toggle("hide", active && onlyEl.checked ? !(m || everyone) : false);
+    });
+    // hide empty sections
+    document.querySelectorAll("section.cat").forEach(sec => {
+      const anyVisible = sec.querySelectorAll(".card:not(.hide)").length > 0;
+      sec.classList.toggle("hide", !anyVisible);
+    });
+    if (active) {
+      matchInfo.textContent = matchCount + (matchCount === 1 ? " source flagged for you" : " sources flagged for you");
+    } else {
+      matchInfo.textContent = "";
+    }
+  }
+  onlyEl.addEventListener("change", applyFilter);
+  clearBtn.addEventListener("click", () => {
+    profile = {}; saveProfile();
+    document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", "false"));
+    applyFilter();
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    track = {}; saveTrack();
+    cardIndex.forEach(c => {
+      const r = rec(c.id);
+      c.el.classList.remove("searched");
+      c.el.querySelector(".check").checked = false;
+      const sel = c.el.querySelector("select"); sel.value = "todo"; sel.classList.remove("st-claiming", "st-claimed");
+      c.el.querySelector(".amt").value = "";
+      c.el.querySelector(".notes-in").value = "";
+    });
+    track = {};
+    updateTotals();
+  });
+
+  updateTotals();
+  applyFilter();
+</script>
+</body>
+</html>
