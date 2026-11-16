@@ -1,7 +1,7 @@
 {
   "format": "fyf-whd-index",
   "version": 1,
-  "generated": "2026-11-16T22:23:06.416Z",
+  "generated": "2026-11-16T22:56:56.835Z",
   "source": {
     "name": "U.S. Department of Labor, Wage and Hour Division: Enforcement data",
     "url": "https://dataportal.dol.gov/",
@@ -27,7 +27,7 @@
     "AZ": {
       "file": "AZ.json",
       "cases": 3410,
-      "bytes": 402578
+      "bytes": 402568
     },
     "CA": {
       "file": "CA.json",
@@ -42,7 +42,7 @@
     "CT": {
       "file": "CT.json",
       "cases": 2081,
-      "bytes": 242845
+      "bytes": 242835
     },
     "DC": {
       "file": "DC.json",
@@ -167,7 +167,7 @@
     "NE": {
       "file": "NE.json",
       "cases": 1893,
-      "bytes": 217638
+      "bytes": 217628
     },
     "NH": {
       "file": "NH.json",
@@ -192,12 +192,12 @@
     "NY": {
       "file": "NY.json",
       "cases": 12792,
-      "bytes": 1528398
+      "bytes": 1528378
     },
     "OH": {
       "file": "OH.json",
       "cases": 6012,
-      "bytes": 711782
+      "bytes": 711762
     },
     "OK": {
       "file": "OK.json",
@@ -222,7 +222,7 @@
     "RI": {
       "file": "RI.json",
       "cases": 1074,
-      "bytes": 128773
+      "bytes": 128763
     },
     "SC": {
       "file": "SC.json",
@@ -242,7 +242,7 @@
     "TX": {
       "file": "TX.json",
       "cases": 26861,
-      "bytes": 3167150
+      "bytes": 3167140
     },
     "UT": {
       "file": "UT.json",
