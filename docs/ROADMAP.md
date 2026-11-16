@@ -40,22 +40,45 @@ Exit criterion: a trustworthy directory and tracker with a passing test suite.
 | Search and filtering | Done: text search across sources plus the tag filter. |
 | Fonts and privacy disclosures | Done: system fonts only, so the page makes no third-party requests on load. |
 
-## Phase 2: Discovery foundation (not started)
+## Decision: free public use, no stored personal data (Nov 16, 2026)
 
-Backend (FastAPI + PostgreSQL), consent management, profiles, connector framework with the
-`API / BULK_DATA / USER_AUTHORIZED / ASSISTED / UNAVAILABLE` classification, job processing,
-evidence storage, and matching. First integrations: The MLC (public search API and bulk data,
-subject to its terms) alongside assisted Illinois and Michigan workflows.
+The goal is free public use. Rather than the spec's account-based backend (SPEC §7), which would
+mean paying indefinitely to hold strangers' identity and financial records and carrying the
+obligations in SPEC §10, the public service works like this:
 
-Decisions needed before it starts:
+- **No accounts and no server-side personal data.** Tracking stays in the visitor's browser.
+- **Discovery runs in the browser** against official data that the project republishes as
+  static files. Visitors download a dataset slice and search it on their own device, so
+  what they type is never sent to us or anyone else.
+- **Keys stay out of the page.** Where a data provider requires an API key, a scheduled GitHub
+  Action holds it as a repository secret and publishes the processed data with the site.
+- **Hosting stays free** (GitHub Pages and Actions).
 
-1. **Personal tool or public service.** A public system holding other people's identity and
-   financial records carries much heavier security, legal, and compliance obligations
-   (SPEC §10), including state finder/asset-recovery laws.
-2. **Hosting and spend.** A backend needs paid hosting, a database, encrypted storage, and an
-   identity provider. GitHub Pages stays the public front end.
-3. **Data-provider permissions.** MLC API terms and any state data access must be confirmed
-   before automated use. No CAPTCHA bypassing, credential sharing, or unsupported scraping.
+Sources whose data isn't published in a form we're allowed to reuse stay `ASSISTED`. The spec's
+claim-preparation and account features would need a backend and are deferred until there is a
+way to fund and govern one.
+
+### Source research (Nov 16, 2026)
+
+| Source | Finding | Classification |
+|---|---|---|
+| DOL Wage and Hour enforcement data | Every concluded case since FY2005 with employer, back wages, and workers owed. Public domain, updated quarterly, via DOL's Open Data API with a free key. | `BULK_DATA`, built |
+| State unclaimed property | No state found that publishes its owner list as open data (Texas requires an emailed request). Official sites block automated searches. | `ASSISTED` |
+| City and county unclaimed funds | Some local registers are open data (for example Austin, TX on Socrata). | Candidate for `BULK_DATA` |
+| The MLC | Public Search API is in beta and requires an access application; governed by the Musical Works Database Terms of Use. | Pending your application |
+| FDIC failed banks | Public, keyless API. Useful for "did a bank I used fail?" | Candidate |
+
+## Phase 2: Discovery foundation (in progress)
+
+| Item | Status |
+|---|---|
+| Back-wage lead finder (DOL WHD) | Built. Employer search in the browser; results link to Workers Owed Wages and can be saved to notes. Turns on once the data is first downloaded. |
+| Data pipeline | `scripts/build-whd.mjs` plus the monthly `Refresh back-wage data` workflow. Fails rather than publishing if DOL's fields change. |
+| Guard against test data | A test fails if published data looks like the sample fixture. |
+| **Needs you:** DOL API key | Register at dataportal.dol.gov, then add the key as a repository secret named `DOL_API_KEY` and run the workflow once. |
+| Local funds (Socrata) | Not started |
+| FDIC failed-bank check | Not started |
+| The MLC | Blocked on an access application |
 
 ## Phase 3: Recovery workflows (not started)
 

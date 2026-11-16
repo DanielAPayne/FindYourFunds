@@ -6,7 +6,8 @@
   "license": "UNLICENSED",
   "engines": { "node": ">=20" },
   "scripts": {
-    "test": "node --test test/core.test.js",
+    "test": "node --test test/core.test.js test/leads.test.js",
+    "build:whd": "node scripts/build-whd.mjs",
     "check-links": "node scripts/check-links.mjs",
     "build:csv": "node scripts/build-csv.mjs",
     "check:csv": "node scripts/build-csv.mjs --check"

@@ -1,0 +1,57 @@
+name: Refresh back-wage data
+
+# DOL updates its Wage and Hour enforcement dataset quarterly. Checking monthly
+# picks up each release within a few weeks; a run with no changes commits nothing.
+on:
+  schedule:
+    - cron: "41 9 6 * *"   # 6th of each month, 09:41 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-whd
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check for the DOL API key
+        id: key
+        env:
+          DOL_API_KEY: ${{ secrets.DOL_API_KEY }}
+        run: |
+          if [ -z "$DOL_API_KEY" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "## Back-wage data not refreshed" >> "$GITHUB_STEP_SUMMARY"
+            echo "Add a repository secret named DOL_API_KEY (free from dataportal.dol.gov) to turn this on." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build the index from DOL data
+        if: steps.key.outputs.present == 'true'
+        env:
+          DOL_API_KEY: ${{ secrets.DOL_API_KEY }}
+        run: node scripts/build-whd.mjs
+      - name: Tests still pass
+        if: steps.key.outputs.present == 'true'
+        run: npm test
+      - name: Commit if the data changed
+        if: steps.key.outputs.present == 'true'
+        run: |
+          git add data/whd
+          if git diff --cached --quiet; then
+            echo "No change in DOL data." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Refresh back-wage data from DOL Wage and Hour enforcement dataset"
+          git push
+          echo "Published $(jq .total_cases data/whd/index.json) cases across $(jq '.states|length' data/whd/index.json) states." >> "$GITHUB_STEP_SUMMARY"

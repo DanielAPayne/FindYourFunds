@@ -1,0 +1,13 @@
+{
+  "format": "fyf-whd-index",
+  "version": 1,
+  "status": "not_built",
+  "generated": null,
+  "source": {
+    "name": "U.S. Department of Labor, Wage and Hour Division: Enforcement data",
+    "url": "https://dataportal.dol.gov/",
+    "records_read": 0
+  },
+  "total_cases": 0,
+  "states": {}
+}
